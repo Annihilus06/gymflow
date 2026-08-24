@@ -1,0 +1,56 @@
+{
+  "name": "GymFlow — Smart Workout Tracker",
+  "short_name": "GymFlow",
+  "description": "Production-grade, mobile-first workout tracking and fitness planning platform.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#09090b",
+  "theme_color": "#22c55e",
+  "categories": ["fitness", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Workout",
+      "short_name": "Today",
+      "description": "Open your scheduled workout for today",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Execute Workout",
+      "short_name": "Workout",
+      "description": "Start or resume live workout execution mode",
+      "url": "/execute",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Training Calendar",
+      "short_name": "Calendar",
+      "description": "View monthly and weekly workout schedule",
+      "url": "/calendar",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Goals & Progress",
+      "short_name": "Progress",
+      "description": "Check current goal and workout statistics",
+      "url": "/progress",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    }
+  ]
+}
