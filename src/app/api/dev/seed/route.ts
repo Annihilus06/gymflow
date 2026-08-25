@@ -10,12 +10,12 @@ export async function POST() {
   try {
     // 1. Seed Muscle Groups
     const muscleGroupsData = [
-      { name: 'Chest', description: 'Pectoralis major and minor' },
-      { name: 'Back', description: 'Latissimus dorsi, rhomboids, trapezius' },
-      { name: 'Shoulders', description: 'Deltoids and rotator cuff' },
-      { name: 'Legs', description: 'Quadriceps, hamstrings, glutes, calves' },
-      { name: 'Arms', description: 'Biceps brachii, triceps brachii, forearms' },
-      { name: 'Core', description: 'Rectus abdominis, obliques, transverse abdominis' },
+      { name: 'Chest', bodyPart: 'Chest' },
+      { name: 'Back', bodyPart: 'Back' },
+      { name: 'Shoulders', bodyPart: 'Shoulders' },
+      { name: 'Legs', bodyPart: 'Legs' },
+      { name: 'Arms', bodyPart: 'Arms' },
+      { name: 'Core', bodyPart: 'Waist' },
     ];
 
     const muscleGroupMap: Record<string, string> = {};
@@ -69,9 +69,21 @@ export async function POST() {
     await prisma.weightLog.deleteMany({ where: { userId: demoUser.id } });
     await prisma.weightLog.createMany({
       data: [
-        { userId: demoUser.id, weightKg: 85.0, loggedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-        { userId: demoUser.id, weightKg: 83.5, loggedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
-        { userId: demoUser.id, weightKg: 82.5, loggedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
+        {
+          userId: demoUser.id,
+          weightKg: 85.0,
+          loggedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        },
+        {
+          userId: demoUser.id,
+          weightKg: 83.5,
+          loggedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+        },
+        {
+          userId: demoUser.id,
+          weightKg: 82.5,
+          loggedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        },
       ],
     });
 
