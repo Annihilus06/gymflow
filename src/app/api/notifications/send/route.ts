@@ -39,8 +39,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Fix: Added ': any' to tell strict TypeScript to relax about the exact shape
-    let payload: any = {
+    // Fix: Explicitly defining the shape here keeps both TypeScript and ESLint perfectly happy!
+    let payload: { title: string; body: string; url?: string } = {
       title: 'GymFlow Notification',
       body: 'Stay active and hit your daily workout goals!',
       url: '/dashboard',
