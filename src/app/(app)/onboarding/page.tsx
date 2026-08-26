@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { onboardingSchema, type OnboardingInput } from '@/lib/validations/profile.schema';
@@ -25,6 +26,7 @@ import {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { update } = useSession();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -90,6 +92,11 @@ export default function OnboardingPage() {
   };
 
   const onSubmit = async (data: OnboardingInput) => {
+    if (step < 3) {
+      await nextStep();
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -108,6 +115,7 @@ export default function OnboardingPage() {
         return;
       }
 
+      await update?.({ onboardingComplete: true });
       router.push('/dashboard');
       router.refresh();
     } catch {
@@ -133,7 +141,22 @@ export default function OnboardingPage() {
       </div>
 
       <Card className="border-border/80 bg-card shadow-lg">
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          onSubmit={(e) => {
+            if (step < 3) {
+              e.preventDefault();
+              nextStep();
+              return;
+            }
+            handleSubmit(onSubmit)(e);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && step < 3) {
+              e.preventDefault();
+              nextStep();
+            }
+          }}
+        >
           {/* STEP 1: Personal Details */}
           {step === 1 && (
             <>
