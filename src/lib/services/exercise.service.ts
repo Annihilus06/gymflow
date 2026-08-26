@@ -444,4 +444,116 @@ export class ExerciseService {
       })),
     };
   }
+
+  /**
+   * Creates a user-defined custom exercise with muscle group associations.
+   */
+  static async createCustomExercise(
+    userId: string,
+    input: {
+      name: string;
+      category?: ExerciseCategory;
+      primaryMuscle: string;
+      secondaryMuscles?: string[];
+      description?: string | null;
+      instructions?: string[];
+      videoUrl?: string | null;
+      imageUrl?: string | null;
+    }
+  ) {
+    if (!userId) {
+      throw AppError.unauthorized('User session required.');
+    }
+
+    const {
+      name,
+      category = 'STRENGTH',
+      primaryMuscle,
+      secondaryMuscles = [],
+      description,
+      instructions = [],
+      videoUrl,
+      imageUrl,
+    } = input;
+
+    // 1. Find or create primary muscle group
+    let primaryMg = await prisma.muscleGroup.findFirst({
+      where: { name: { equals: primaryMuscle, mode: 'insensitive' } },
+    });
+
+    if (!primaryMg) {
+      primaryMg = await prisma.muscleGroup.create({
+        data: {
+          name: primaryMuscle,
+          bodyPart: primaryMuscle,
+        },
+      });
+    }
+
+    // 2. Prepare secondary muscle group relations
+    const secondaryMuscleGroupIds: string[] = [];
+    for (const secMuscle of secondaryMuscles) {
+      if (!secMuscle.trim() || secMuscle.toLowerCase() === primaryMuscle.toLowerCase()) continue;
+      let secMg = await prisma.muscleGroup.findFirst({
+        where: { name: { equals: secMuscle.trim(), mode: 'insensitive' } },
+      });
+      if (!secMg) {
+        secMg = await prisma.muscleGroup.create({
+          data: {
+            name: secMuscle.trim(),
+            bodyPart: secMuscle.trim(),
+          },
+        });
+      }
+      secondaryMuscleGroupIds.push(secMg.id);
+    }
+
+    // 3. Create exercise
+    const created = await prisma.exercise.create({
+      data: {
+        name: name.trim(),
+        category,
+        description: description?.trim() || null,
+        instructions: instructions.filter((i) => i.trim().length > 0),
+        isCustom: true,
+        videoUrl: videoUrl?.trim() || null,
+        imageUrl: imageUrl?.trim() || null,
+        muscles: {
+          create: [
+            {
+              muscleGroupId: primaryMg.id,
+              isPrimary: true,
+            },
+            ...secondaryMuscleGroupIds.map((mgId) => ({
+              muscleGroupId: mgId,
+              isPrimary: false,
+            })),
+          ],
+        },
+      },
+      include: {
+        muscles: {
+          include: {
+            muscleGroup: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: created.id,
+      name: created.name,
+      category: created.category,
+      description: created.description,
+      instructions: created.instructions,
+      imageUrl: created.imageUrl,
+      videoUrl: created.videoUrl,
+      isCustom: created.isCustom,
+      primaryMuscle: created.muscles.find((m) => m.isPrimary)?.muscleGroup.name ?? primaryMuscle,
+      muscles: created.muscles.map((m) => ({
+        name: m.muscleGroup.name,
+        isPrimary: m.isPrimary,
+      })),
+    };
+  }
 }

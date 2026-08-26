@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarIcon, CheckCircle2, Moon, ChevronRight } from 'lucide-react';
 import type { WeeklyScheduleResponse, CalendarDayEvent } from '@/lib/services/calendar.service';
@@ -18,7 +19,7 @@ export function DashboardCalendar({
   selectedDateStr,
   onSelectDate,
 }: DashboardCalendarProps) {
-  if (!schedule?.activeRoutine) {
+  if (!schedule || !schedule.days || schedule.days.length === 0) {
     return null;
   }
 
@@ -26,6 +27,8 @@ export function DashboardCalendar({
     schedule.days.find((d: CalendarDayEvent) => d.dateStr === selectedDateStr) ||
     schedule.days.find((d: CalendarDayEvent) => d.isToday) ||
     schedule.days[0];
+
+  const routineName = schedule.activeRoutine?.name || 'Weekly Calendar';
 
   return (
     <Card className="border-border bg-card shadow-sm">
@@ -36,13 +39,15 @@ export function DashboardCalendar({
             Weekly Schedule & Calendar
           </CardTitle>
           <CardDescription className="text-xs">
-            {schedule.activeRoutine.name} • Tap any day to inspect planned movements.
+            {schedule.activeRoutine
+              ? `${routineName} • Tap any day to inspect or plan workouts.`
+              : 'Interactive 7-day calendar • Tap any day to view or configure training.'}
           </CardDescription>
         </div>
 
         <Link href="/calendar">
           <Badge variant="outline" className="text-[10px] gap-1 cursor-pointer hover:bg-muted">
-            Full Month
+            Full Calendar
             <ChevronRight className="h-2.5 w-2.5" />
           </Badge>
         </Link>
@@ -114,32 +119,49 @@ export function DashboardCalendar({
         </div>
 
         {/* Selected Day Exercise Preview */}
-        {selectedDay && !selectedDay.isRestDay && selectedDay.exercises.length > 0 && (
+        {selectedDay && (
           <div className="p-3 rounded-lg border border-border/80 bg-muted/10 space-y-2 text-xs">
             <div className="flex items-center justify-between">
               <span className="font-bold text-foreground">
-                {selectedDay.dayOfWeek} Details: {selectedDay.label || 'Workout Day'}
+                {selectedDay.dayOfWeek} ({selectedDay.dateStr}) • {selectedDay.isRestDay ? 'Rest / Recovery' : selectedDay.label || 'Workout Day'}
               </span>
-              <Badge variant="outline" className="text-[10px]">
-                {selectedDay.exercises.length} exercises
-              </Badge>
+              {!selectedDay.isRestDay && (
+                <Badge variant="outline" className="text-[10px]">
+                  {selectedDay.exercises.length} exercises
+                </Badge>
+              )}
             </div>
 
-            <div className="grid gap-1.5 sm:grid-cols-2">
-              {selectedDay.exercises.map((ex, i) => (
-                <div
-                  key={ex.id}
-                  className="flex items-center justify-between p-2 rounded bg-card border border-border/50 text-[11px]"
-                >
-                  <span className="font-semibold text-foreground truncate">
-                    {i + 1}. {ex.name}
-                  </span>
-                  <span className="text-muted-foreground flex-shrink-0 ml-2">
-                    {ex.defaultSets}×{ex.defaultReps}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {selectedDay.exercises.length > 0 ? (
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {selectedDay.exercises.map((ex, i) => (
+                  <div
+                    key={ex.id}
+                    className="flex items-center justify-between p-2 rounded bg-card border border-border/50 text-[11px]"
+                  >
+                    <span className="font-semibold text-foreground truncate">
+                      {i + 1}. {ex.name}
+                    </span>
+                    <span className="text-muted-foreground flex-shrink-0 ml-2">
+                      {ex.defaultSets}×{ex.defaultReps}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-muted-foreground text-[11px]">
+                  {selectedDay.isRestDay
+                    ? 'Scheduled recovery day for muscle repair.'
+                    : 'No specific exercises assigned yet for this day.'}
+                </p>
+                <Link href="/workout">
+                  <Button variant="ghost" size="sm" className="text-xs h-7 text-primary hover:text-primary">
+                    + Configure Split
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

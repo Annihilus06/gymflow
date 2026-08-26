@@ -14,22 +14,45 @@ interface TodayWorkoutCardProps {
 }
 
 export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCardProps) {
+  const formattedToday = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+
   if (!hasActiveRoutine) {
     return (
-      <Card className="border-dashed border-primary/40 bg-card/60 p-6 text-center shadow-sm">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
-          <Dumbbell className="h-6 w-6" />
+      <Card className="border-border bg-gradient-to-br from-card via-card to-primary/5 p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[10px] font-bold text-primary border-primary/30">
+                TODAY • {formattedToday}
+              </Badge>
+            </div>
+            <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
+              Ready to Train Today?
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground max-w-md">
+              You can start a freestyle workout immediately or customize your weekly split to plan exercises.
+            </CardDescription>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/execute">
+              <Button size="sm" className="gap-1.5 font-semibold text-xs h-9 shadow-sm">
+                <Play className="h-3.5 w-3.5 fill-current" />
+                Start Today&apos;s Workout
+              </Button>
+            </Link>
+            <Link href="/workout">
+              <Button variant="outline" size="sm" className="gap-1.5 font-semibold text-xs h-9">
+                <PlusCircle className="h-3.5 w-3.5" />
+                Customize Routine Split
+              </Button>
+            </Link>
+          </div>
         </div>
-        <CardTitle className="text-lg font-bold text-foreground">No Routine Configured Yet</CardTitle>
-        <CardDescription className="text-xs text-muted-foreground max-w-sm mx-auto mt-1 mb-4">
-          Create your personalized weekly training routine to schedule workouts and unlock calendar tracking.
-        </CardDescription>
-        <Link href="/workout">
-          <Button size="sm" className="gap-1.5 font-semibold text-xs h-9">
-            <PlusCircle className="h-4 w-4" />
-            Build Your First Routine
-          </Button>
-        </Link>
       </Card>
     );
   }

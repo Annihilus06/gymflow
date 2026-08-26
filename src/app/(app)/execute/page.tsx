@@ -22,6 +22,7 @@ import {
   Clock,
   Flag,
 } from 'lucide-react';
+import { FormVideoGuideModal } from '@/components/exercises/FormVideoGuideModal';
 
 interface SetItem {
   id: string;
@@ -41,6 +42,8 @@ interface ExerciseLogItem {
     id: string;
     name: string;
     category: string;
+    instructions?: string[];
+    videoUrl?: string | null;
     muscles: { isPrimary: boolean; muscleGroup: { name: string } }[];
   };
   sets: SetItem[];
@@ -64,6 +67,9 @@ function ExecuteWorkoutContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFinishing, setIsFinishing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Form Guide Modal State
+  const [showFormGuide, setShowFormGuide] = useState(false);
 
   // Workout Elapsed Timer
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -460,8 +466,18 @@ function ExecuteWorkoutContent() {
                 </div>
               </div>
 
-              {/* Quick Rest Triggers */}
-              <div className="flex items-center gap-1">
+              {/* Quick Actions */}
+              <div className="flex flex-wrap items-center gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFormGuide(true)}
+                  className="text-[11px] h-7 px-2 gap-1 text-primary border-primary/30 hover:bg-primary/10 font-semibold"
+                >
+                  <Play className="h-2.5 w-2.5 fill-current text-red-500" />
+                  Form
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -470,7 +486,7 @@ function ExecuteWorkoutContent() {
                   className="text-[10px] h-7 px-2 gap-1 text-muted-foreground"
                 >
                   <Clock className="h-3 w-3" />
-                  60s Rest
+                  60s
                 </Button>
                 <Button
                   type="button"
@@ -701,6 +717,18 @@ function ExecuteWorkoutContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Form Video Guide Modal */}
+      {currentExerciseLog && (
+        <FormVideoGuideModal
+          isOpen={showFormGuide}
+          onClose={() => setShowFormGuide(false)}
+          exerciseName={currentExerciseLog.exercise.name}
+          primaryMuscle={currentExerciseLog.exercise.muscles[0]?.muscleGroup.name}
+          videoUrl={currentExerciseLog.exercise.videoUrl}
+          instructions={currentExerciseLog.exercise.instructions}
+        />
       )}
     </div>
   );

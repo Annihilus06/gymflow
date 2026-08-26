@@ -2,7 +2,9 @@ import { AIClient } from '@/lib/ai/client';
 import { sanitizeUserContextForAI, type RawUserProfileContext } from '@/lib/ai/guards';
 import {
   WorkoutOptimizationOutputSchema,
+  AIGoalSuggestionOutputSchema,
   type WorkoutOptimizationOutput,
+  type AIGoalSuggestionOutput,
 } from '@/lib/validations/ai.schema';
 import { AppError } from '@/lib/errors/app-error';
 import type { PromptExerciseInput } from '@/lib/ai/prompts';
@@ -13,6 +15,13 @@ export interface OptimizeWorkoutOptions {
   userProfile?: RawUserProfileContext | null;
   timeBudgetMinutes?: number | null;
   focusGoal?: string | null;
+}
+
+export interface GoalSuggestionOptions {
+  dayLabel: string;
+  dayOfWeek?: string | null;
+  userProfile?: RawUserProfileContext | null;
+  currentExercises?: Array<{ name: string; primaryMuscle?: string | null }>;
 }
 
 export class AIService {
@@ -99,4 +108,54 @@ export class AIService {
       reasoningSummary: validatedData.reasoningSummary,
     };
   }
+
+  /**
+   * Generates goal-tailored exercise and split advice for a workout day.
+   */
+  static async suggestForGoal(options: GoalSuggestionOptions): Promise<AIGoalSuggestionOutput> {
+    const { dayLabel, dayOfWeek, userProfile, currentExercises } = options;
+
+    if (!dayLabel.trim()) {
+      throw AppError.badRequest('Day label or muscle focus is required.');
+    }
+
+    // 1. Sanitize user profile (strip PII)
+    const sanitized = sanitizeUserContextForAI(userProfile);
+
+    // 2. Call AI provider
+    let rawOutput: string;
+    try {
+      rawOutput = await AIClient.generateGoalSuggestions({
+        dayLabel: dayLabel.trim(),
+        dayOfWeek: dayOfWeek ?? undefined,
+        userGoal: sanitized.fitnessGoal,
+        experienceLevel: sanitized.experienceLevel,
+        currentExercises: currentExercises || [],
+      });
+    } catch {
+      throw AppError.serviceUnavailable(
+        'AI_UNAVAILABLE',
+        'AI suggestion service is temporarily unavailable. Please try again later.'
+      );
+    }
+
+    // 3. Parse JSON and validate with Zod
+    let parsedJson: unknown;
+    try {
+      parsedJson = JSON.parse(rawOutput);
+    } catch {
+      throw AppError.validation(null, 'AI returned malformed JSON output.');
+    }
+
+    const parseResult = AIGoalSuggestionOutputSchema.safeParse(parsedJson);
+    if (!parseResult.success) {
+      throw AppError.validation(
+        parseResult.error.flatten().fieldErrors,
+        'AI goal output failed schema validation.'
+      );
+    }
+
+    return parseResult.data;
+  }
 }
+

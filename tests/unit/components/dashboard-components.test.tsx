@@ -15,8 +15,8 @@ describe('Dashboard Modular UI Components', () => {
   describe('TodayWorkoutCard', () => {
     it('renders empty routine state with CTA when user has no active routine', () => {
       render(<TodayWorkoutCard hasActiveRoutine={false} />);
-      expect(screen.getByText(/No Routine Configured Yet/i)).toBeInTheDocument();
-      expect(screen.getByText(/Build Your First Routine/i)).toBeInTheDocument();
+      expect(screen.getByText(/Ready to Train Today\?/i)).toBeInTheDocument();
+      expect(screen.getByText(/Start Today's Workout/i)).toBeInTheDocument();
     });
 
     it('renders recovery card when today is a rest day', () => {

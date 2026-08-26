@@ -15,8 +15,12 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  Play,
+  Sparkles,
 } from 'lucide-react';
 import type { NormalizedExercise } from '@/lib/exercise-api/normalizer';
+import { CreateCustomExerciseModal } from '@/components/exercises/CreateCustomExerciseModal';
+import { FormVideoGuideModal } from '@/components/exercises/FormVideoGuideModal';
 
 const MUSCLE_FILTER_CHIPS = [
   'All',
@@ -39,6 +43,15 @@ export default function ExercisesPage() {
   const [matchStatus, setMatchStatus] = useState<string | null>(null);
   const [attribution, setAttribution] = useState<string | null>(null);
 
+  // Modals state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedGuideExercise, setSelectedGuideExercise] = useState<{
+    name: string;
+    primaryMuscle?: string | null;
+    videoUrl?: string | null;
+    instructions?: string[];
+  } | null>(null);
+
   const fetchExercises = useCallback(async (query: string) => {
     setIsLoading(true);
     try {
@@ -55,19 +68,20 @@ export default function ExercisesPage() {
         if (res.ok) {
           const json = await res.json();
           setExercises(
-            json.exercises.map((e: { id: string; name: string; description: string | null; instructions: string[]; category: string; primaryMuscle: string | null; muscles: { name: string; isPrimary: boolean }[]; imageUrl: string | null; videoUrl: string | null }) => ({
+            json.exercises.map((e: { id: string; name: string; description: string | null; instructions: string[]; category: string; primaryMuscle: string | null; muscles: { name: string; isPrimary: boolean }[]; imageUrl: string | null; videoUrl: string | null; isCustom?: boolean }) => ({
               externalId: e.id,
               name: e.name,
               description: e.description,
               instructions: e.instructions,
               category: e.category,
-              equipment: 'Standard',
+              equipment: e.isCustom ? 'Custom' : 'Standard',
               difficulty: 'INTERMEDIATE',
               imageUrl: e.imageUrl,
               videoUrl: e.videoUrl,
+              isCustom: e.isCustom,
               primaryMuscles: e.primaryMuscle ? [e.primaryMuscle] : ['Full Body'],
               secondaryMuscles: e.muscles.filter((m) => !m.isPrimary).map((m) => m.name),
-              attribution: 'GymFlow Standard Exercise Catalogue',
+              attribution: e.isCustom ? 'User Custom Exercise' : 'GymFlow Standard Exercise Catalogue',
               confidenceScore: 1.0,
             }))
           );
@@ -93,6 +107,10 @@ export default function ExercisesPage() {
     setExpandedExerciseId((prev) => (prev === id ? null : id));
   };
 
+  const handleCustomExerciseCreated = () => {
+    fetchExercises(searchQuery);
+  };
+
   const filteredExercises = exercises.filter((ex) => {
     if (selectedMuscle === 'All') return true;
     return ex.primaryMuscles.some((m) => m.toLowerCase() === selectedMuscle.toLowerCase());
@@ -101,11 +119,22 @@ export default function ExercisesPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Exercise Library</h1>
-        <p className="text-sm text-muted-foreground">
-          Explore movement mechanics, target muscle groups, instructions, and video demos.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Exercise Library</h1>
+          <p className="text-sm text-muted-foreground">
+            Explore movement mechanics, target muscle groups, instructions, and video demos.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          onClick={() => setIsCreateModalOpen(true)}
+          className="font-semibold gap-2 shadow-sm shrink-0"
+        >
+          <Plus className="h-4 w-4" />
+          Create Custom Exercise
+        </Button>
       </div>
 
       {/* Search and Filters */}
@@ -244,28 +273,48 @@ export default function ExercisesPage() {
                 )}
 
                 <CardFooter className="flex items-center justify-between border-t border-border/50 pt-2 pb-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleExpand(ex.externalId)}
-                    className="text-xs h-8 gap-1 text-muted-foreground"
-                  >
-                    {isExpanded ? (
-                      <>
-                        <ChevronUp className="h-3.5 w-3.5" />
-                        Less Info
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="h-3.5 w-3.5" />
-                        Instructions
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleExpand(ex.externalId)}
+                      className="text-xs h-8 gap-1 text-muted-foreground"
+                    >
+                      {isExpanded ? (
+                        <>
+                          <ChevronUp className="h-3.5 w-3.5" />
+                          Less
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-3.5 w-3.5" />
+                          Steps
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setSelectedGuideExercise({
+                          name: ex.name,
+                          primaryMuscle: ex.primaryMuscles[0] ?? null,
+                          videoUrl: ex.videoUrl,
+                          instructions: ex.instructions,
+                        })
+                      }
+                      className="text-xs h-8 gap-1 text-primary border-primary/30 hover:bg-primary/10 font-medium"
+                    >
+                      <Play className="h-3 w-3 fill-current text-red-500" />
+                      Form & Video
+                    </Button>
+                  </div>
 
                   <Link href="/workout">
-                    <Button variant="outline" size="sm" className="text-xs h-8 gap-1">
+                    <Button size="sm" className="text-xs h-8 gap-1 font-semibold">
                       <Plus className="h-3 w-3" />
                       Add to Split
                     </Button>
@@ -275,6 +324,25 @@ export default function ExercisesPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Create Custom Exercise Modal */}
+      <CreateCustomExerciseModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreated={handleCustomExerciseCreated}
+      />
+
+      {/* Form Video Guide Modal */}
+      {selectedGuideExercise && (
+        <FormVideoGuideModal
+          isOpen={Boolean(selectedGuideExercise)}
+          onClose={() => setSelectedGuideExercise(null)}
+          exerciseName={selectedGuideExercise.name}
+          primaryMuscle={selectedGuideExercise.primaryMuscle}
+          videoUrl={selectedGuideExercise.videoUrl}
+          instructions={selectedGuideExercise.instructions}
+        />
       )}
     </div>
   );

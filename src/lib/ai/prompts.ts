@@ -87,3 +87,61 @@ Respond with a JSON object strictly conforming to this schema:
   "reasoningSummary": "Short paragraph summarizing the biomechanical rationale."
 }`;
 }
+
+export function buildGoalSuggestionSystemPrompt(): string {
+  return `You are GymFlow's Chief Exercise Physiologist and Workout Programming AI.
+
+Your task is to analyze the user's custom workout day split (e.g., "Chest + Back + Triceps" on Sunday) and their primary goal (e.g., Muscle Gain / Hypertrophy, Strength Target, Fat Loss) and recommend the best exercises, rep schemes, volume, and biomechanical form cues.
+
+Programming Principles:
+1. MUSCLE GAIN / HYPERTROPHY: Target 8–12 reps per set with 3–4 working sets. Focus on high mechanical tension, stretch under load, and paired antagonist or compound-accessory supersets.
+2. STRENGTH: Target 4–6 reps on heavy compound movements (Bench Press, Barbell Row, Overhead Press, Squats, Deadlifts) with longer rest periods.
+3. FAT LOSS / WORKOUT FREQUENCY: Target 10–15 reps with controlled tempo and balanced push/pull volume.
+4. SPLIT BALANCE: If user selects multiple muscle groups on one day (e.g., Chest, Back & Triceps), ensure optimal sequencing (primary compound chest press -> compound row -> tricep extension -> accessory).
+
+CRITICAL RULES:
+- Output MUST be valid, well-formed JSON matching the required schema.
+- Do not output any Markdown wrapping outside the JSON object.
+- Keep recommendations practical, safe, and motivating.`;
+}
+
+export function buildGoalSuggestionUserPrompt(params: {
+  dayLabel: string;
+  dayOfWeek?: string | null;
+  userGoal: string;
+  experienceLevel: string;
+  currentExercises?: Array<{ name: string; primaryMuscle?: string | null }>;
+}): string {
+  const { dayLabel, dayOfWeek, userGoal, experienceLevel, currentExercises = [] } = params;
+
+  return `Please provide tailored exercise and programming recommendations for this training day:
+
+Day: ${dayOfWeek || 'Custom Day'}
+Day Muscle Focus: "${sanitizeTextForPrompt(dayLabel, 60)}"
+User Fitness Goal: ${userGoal}
+Experience Level: ${experienceLevel}
+Current Exercises Entered by User (${currentExercises.length}):
+${JSON.stringify(currentExercises, null, 2)}
+
+Respond with a JSON object strictly conforming to this schema:
+{
+  "goalAnalysis": "Detailed analysis of how this split supports the user's specific fitness goal.",
+  "splitAssessment": "Assessment of the muscle group combinations and volume distribution.",
+  "recommendedExercises": [
+    {
+      "name": "Exercise Name",
+      "category": "STRENGTH",
+      "primaryMuscle": "Target Muscle",
+      "targetSets": 3,
+      "targetReps": "8-12 reps",
+      "rationale": "Biomechanical rationale for this movement"
+    }
+  ],
+  "formAndRecoveryTips": [
+    "Tip 1: Form / tempo / mind-muscle connection",
+    "Tip 2: Recovery / protein hydration"
+  ],
+  "suggestedRepRangeForGoal": "e.g. 8-12 reps (Hypertrophy focus)"
+}`;
+}
+

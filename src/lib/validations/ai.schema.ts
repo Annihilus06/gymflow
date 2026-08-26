@@ -53,3 +53,45 @@ export const aiOptimizeInputSchema = z.object({
 });
 
 export type AIOptimizeInput = z.infer<typeof aiOptimizeInputSchema>;
+
+export const SuggestedGoalExerciseSchema = z.object({
+  name: z.string().min(1).max(100),
+  category: z.string().default('STRENGTH'),
+  primaryMuscle: z.string().min(1).max(50),
+  targetSets: z.number().int().min(1).max(10),
+  targetReps: z.string().max(50),
+  rationale: z.string().max(400),
+});
+
+export const AIGoalSuggestionOutputSchema = z.object({
+  goalAnalysis: z.string().max(800),
+  splitAssessment: z.string().max(600),
+  recommendedExercises: z.array(SuggestedGoalExerciseSchema),
+  formAndRecoveryTips: z.array(z.string().max(400)),
+  suggestedRepRangeForGoal: z.string().max(100),
+});
+
+export type AIGoalSuggestionOutput = z.infer<typeof AIGoalSuggestionOutputSchema>;
+
+export const aiGoalSuggestionInputSchema = z.object({
+  dayLabel: z.string().min(1, 'Day label or muscle focus is required').max(100),
+  dayOfWeek: z.string().optional().nullable(),
+  routineId: z.string().optional().nullable(),
+  dayId: z.string().optional().nullable(),
+  userGoal: z.string().optional().nullable(),
+  experienceLevel: z.string().optional().nullable(),
+  currentExercises: z
+    .array(
+      z.object({
+        name: z.string(),
+        primaryMuscle: z.string().optional().nullable(),
+        defaultSets: z.number().optional().nullable(),
+        defaultReps: z.number().optional().nullable(),
+      })
+    )
+    .optional()
+    .default([]),
+});
+
+export type AIGoalSuggestionInput = z.infer<typeof aiGoalSuggestionInputSchema>;
+

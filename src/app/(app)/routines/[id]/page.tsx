@@ -23,9 +23,17 @@ import {
   Copy,
   X,
   Sparkles,
+  Target,
+  Play,
 } from 'lucide-react';
 import { AIOptimizeModal } from '@/components/workout/AIOptimizeModal';
-import type { WorkoutOptimizationOutput } from '@/lib/validations/ai.schema';
+import { AIGoalAdvisorModal } from '@/components/workout/AIGoalAdvisorModal';
+import { CreateCustomExerciseModal } from '@/components/exercises/CreateCustomExerciseModal';
+import { FormVideoGuideModal } from '@/components/exercises/FormVideoGuideModal';
+import type {
+  WorkoutOptimizationOutput,
+  AIGoalSuggestionOutput,
+} from '@/lib/validations/ai.schema';
 
 const MUSCLE_TAGS = [
   'Chest',
@@ -64,6 +72,8 @@ interface RoutineDayExerciseItem {
   defaultWeightKg: number | null;
   notes: string | null;
   primaryMuscle: string | null;
+  instructions?: string[];
+  videoUrl?: string | null;
 }
 
 interface RoutineDayData {
@@ -103,10 +113,26 @@ function RoutineDetailContent() {
   const [selectedMuscleFilter, setSelectedMuscleFilter] = useState<string | null>(null);
   const [isLibraryLoading, setIsLibraryLoading] = useState(false);
 
+  // Custom Exercise Creation Modal State
+  const [isCreateCustomOpen, setIsCreateCustomOpen] = useState(false);
+
+  // Form Video Guide Modal State
+  const [formGuideExercise, setFormGuideExercise] = useState<{
+    name: string;
+    primaryMuscle?: string | null;
+    videoUrl?: string | null;
+    instructions?: string[];
+  } | null>(null);
+
   // AI Optimization Modal State
   const [isAIOptimizeOpen, setIsAIOptimizeOpen] = useState(false);
   const [isAIOptimizing, setIsAIOptimizing] = useState(false);
   const [aiOptimizationResult, setAiOptimizationResult] = useState<WorkoutOptimizationOutput | null>(null);
+
+  // AI Goal Advisor Modal State
+  const [isGoalAdvisorOpen, setIsGoalAdvisorOpen] = useState(false);
+  const [isGoalAdvisorLoading, setIsGoalAdvisorLoading] = useState(false);
+  const [goalAdvisorResult, setGoalAdvisorResult] = useState<AIGoalSuggestionOutput | null>(null);
 
   const fetchRoutine = useCallback(async () => {
     try {
@@ -388,6 +414,101 @@ function RoutineDetailContent() {
     }
   };
 
+  // AI Goal Split Advisor handler
+  const handleRunGoalAdvisor = async () => {
+    if (!currentDay) return;
+    setIsGoalAdvisorLoading(true);
+    setErrorMessage(null);
+    try {
+      const res = await fetch('/api/ai/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dayLabel: currentDay.label || currentDay.dayOfWeek,
+          dayOfWeek: currentDay.dayOfWeek,
+          routineId,
+          dayId: currentDay.id,
+          currentExercises: currentDay.exercises.map((e) => ({
+            name: e.name,
+            primaryMuscle: e.primaryMuscle,
+            defaultSets: e.defaultSets,
+            defaultReps: e.defaultReps,
+          })),
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'AI Goal Advisor failed.');
+      }
+      const data = await res.json();
+      setGoalAdvisorResult(data);
+      setIsGoalAdvisorOpen(true);
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to generate goal recommendations.');
+    } finally {
+      setIsGoalAdvisorLoading(false);
+    }
+  };
+
+  const handleAddExerciseFromGoalAdvisor = async (suggested: {
+    name: string;
+    primaryMuscle: string;
+    targetSets: number;
+    targetReps: number;
+  }) => {
+    if (!currentDay) return;
+    try {
+      let targetExId: string | null = null;
+      const searchRes = await fetch(`/api/exercises?q=${encodeURIComponent(suggested.name)}`);
+      if (searchRes.ok) {
+        const searchJson = await searchRes.json();
+        const match = searchJson.exercises?.find(
+          (e: { name: string }) => e.name.toLowerCase() === suggested.name.toLowerCase()
+        );
+        if (match) {
+          targetExId = match.id;
+        }
+      }
+
+      if (!targetExId) {
+        const createRes = await fetch('/api/exercises', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: suggested.name,
+            primaryMuscle: suggested.primaryMuscle,
+            category: 'STRENGTH',
+          }),
+        });
+        if (createRes.ok) {
+          const created = await createRes.json();
+          targetExId = created.id;
+        }
+      }
+
+      if (targetExId) {
+        await fetch(`/api/routines/${routineId}/days/${currentDay.id}/exercises`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            exerciseId: targetExId,
+            defaultSets: suggested.targetSets,
+            defaultReps: suggested.targetReps,
+          }),
+        });
+        await fetchRoutine();
+        setSuccessMessage(`Added "${suggested.name}" to ${currentDay.dayOfWeek}!`);
+      }
+    } catch {
+      setErrorMessage(`Failed to add suggested exercise "${suggested.name}".`);
+    }
+  };
+
+  const handleCustomExerciseCreated = async (created: { id: string; name: string }) => {
+    if (!currentDay) return;
+    await handleAddExercise(created.id);
+  };
+
   // Filtered exercises for the library modal
   const filteredLibraryExercises = useMemo(() => {
     return allExercises.filter((ex) => {
@@ -643,7 +764,23 @@ function RoutineDetailContent() {
                     Planned Exercises ({currentDay.exercises.length})
                   </h3>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isGoalAdvisorLoading}
+                      onClick={handleRunGoalAdvisor}
+                      className="gap-1.5 text-xs h-8 border-primary/40 text-primary hover:bg-primary/10 font-semibold"
+                    >
+                      {isGoalAdvisorLoading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3.5 w-3.5" />
+                      )}
+                      AI Goal Advisor
+                    </Button>
+
                     {currentDay.exercises.length > 0 && (
                       <Button
                         type="button"
@@ -651,14 +788,14 @@ function RoutineDetailContent() {
                         size="sm"
                         disabled={isAIOptimizing}
                         onClick={handleRunAIOptimization}
-                        className="gap-1.5 text-xs h-8 border-primary/40 text-primary hover:bg-primary/10 font-semibold"
+                        className="gap-1.5 text-xs h-8 font-semibold text-muted-foreground hover:text-foreground"
                       >
                         {isAIOptimizing ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         ) : (
-                          <Sparkles className="h-3.5 w-3.5" />
+                          <Target className="h-3.5 w-3.5" />
                         )}
-                        AI Optimize
+                        Optimize Order
                       </Button>
                     )}
 
@@ -680,14 +817,25 @@ function RoutineDetailContent() {
                     <p className="text-xs text-muted-foreground">
                       No exercises added for this day yet.
                     </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={openExerciseLibrary}
-                      className="text-xs"
-                    >
-                      + Browse Exercise Library
-                    </Button>
+                    <div className="flex items-center justify-center gap-2 pt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={openExerciseLibrary}
+                        className="text-xs"
+                      >
+                        + Browse Exercise Library
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={handleRunGoalAdvisor}
+                        className="text-xs gap-1"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        AI Suggest Exercises
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2.5">
@@ -789,7 +937,26 @@ function RoutineDetailContent() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center justify-end">
+                        <div className="flex items-center gap-1.5 justify-end">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setFormGuideExercise({
+                                name: ex.name,
+                                primaryMuscle: ex.primaryMuscle,
+                                videoUrl: ex.videoUrl,
+                                instructions: ex.instructions,
+                              })
+                            }
+                            className="h-7 text-[11px] gap-1 text-primary border-primary/30 hover:bg-primary/10"
+                            aria-label={`Form guide for ${ex.name}`}
+                          >
+                            <Play className="h-2.5 w-2.5 fill-current text-red-500" />
+                            Form
+                          </Button>
+
                           <Button
                             type="button"
                             variant="ghost"
@@ -832,15 +999,27 @@ function RoutineDetailContent() {
 
             {/* Search & Filter Bar */}
             <div className="p-3 border-b border-border/60 space-y-2 bg-muted/20">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search bench press, squat, pull-up..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 h-9 text-sm"
-                  autoFocus
-                />
+              <div className="flex items-center justify-between gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search bench press, squat, pull-up..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 h-9 text-sm"
+                    autoFocus
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsCreateCustomOpen(true)}
+                  className="text-xs h-9 gap-1 shrink-0 font-semibold text-primary border-primary/30 hover:bg-primary/10"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Custom
+                </Button>
               </div>
 
               <div className="flex flex-wrap gap-1">
@@ -884,8 +1063,18 @@ function RoutineDetailContent() {
                   <p className="text-xs text-muted-foreground">Loading exercises...</p>
                 </div>
               ) : filteredLibraryExercises.length === 0 ? (
-                <div className="py-8 text-center text-xs text-muted-foreground">
-                  No matching exercises found.
+                <div className="py-8 text-center space-y-2">
+                  <p className="text-xs text-muted-foreground">No matching exercises found.</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsCreateCustomOpen(true)}
+                    className="text-xs gap-1"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Create &quot;{searchQuery}&quot; as Custom Exercise
+                  </Button>
                 </div>
               ) : (
                 filteredLibraryExercises.map((ex) => (
@@ -919,6 +1108,37 @@ function RoutineDetailContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Create Custom Exercise Modal */}
+      <CreateCustomExerciseModal
+        isOpen={isCreateCustomOpen}
+        onClose={() => setIsCreateCustomOpen(false)}
+        onCreated={handleCustomExerciseCreated}
+      />
+
+      {/* Form Video Guide Modal */}
+      {formGuideExercise && (
+        <FormVideoGuideModal
+          isOpen={Boolean(formGuideExercise)}
+          onClose={() => setFormGuideExercise(null)}
+          exerciseName={formGuideExercise.name}
+          primaryMuscle={formGuideExercise.primaryMuscle}
+          videoUrl={formGuideExercise.videoUrl}
+          instructions={formGuideExercise.instructions}
+        />
+      )}
+
+      {/* AI Goal Advisor Modal */}
+      {currentDay && (
+        <AIGoalAdvisorModal
+          isOpen={isGoalAdvisorOpen}
+          onClose={() => setIsGoalAdvisorOpen(false)}
+          dayLabel={currentDay.label || `Day ${currentDay.dayOfWeek}`}
+          dayOfWeek={currentDay.dayOfWeek}
+          result={goalAdvisorResult}
+          onAddExercise={handleAddExerciseFromGoalAdvisor}
+        />
       )}
 
       {/* AI Optimization Review Diff Modal */}
