@@ -2,6 +2,12 @@
 
 > Production-grade, mobile-first workout tracking and fitness planning platform built with Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, PostgreSQL, Prisma, and PWA capabilities.
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-gymflow--p9jx.vercel.app-2ea44f?style=for-the-badge&logo=vercel)](https://gymflow-p9jx.vercel.app)
+[![Build Status](https://img.shields.io/badge/Status-Live%20in%20Production-success?style=for-the-badge)](https://gymflow-p9jx.vercel.app)
+
+🔗 **Live App**: [https://gymflow-p9jx.vercel.app](https://gymflow-p9jx.vercel.app)  
+🔑 **Demo Credentials**: `demo@gymflow.app` / `Password123!`
+
 ---
 
 ## 📖 Table of Contents
