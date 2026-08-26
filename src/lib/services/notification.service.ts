@@ -102,7 +102,7 @@ export class NotificationService {
    */
   static async sendPushNotification(
     userId: string,
-    payload: NotificationPayload
+    _payload: NotificationPayload
   ): Promise<{ sentCount: number }> {
     const subscriptions = await prisma.pushSubscription.findMany({
       where: { userId },

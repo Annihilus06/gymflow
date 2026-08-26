@@ -6,15 +6,16 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function POST(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
     }
 
-    const activated = await RoutineService.activateRoutine(session.user.id, params.id);
+    const activated = await RoutineService.activateRoutine(session.user.id, id);
     return NextResponse.json(activated, { status: 200 });
   } catch (error) {
     return handleApiError(error);

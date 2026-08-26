@@ -4,8 +4,9 @@ import { ProgressService } from '@/lib/services/progress.service';
 import { AppError } from '@/lib/errors/app-error';
 import { handleApiError } from '@/lib/errors/handle-api-error';
 
-export async function GET(req: Request, { params }: { params: { exerciseId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ exerciseId: string }> }) {
   try {
+    const { exerciseId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -13,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { exerciseId: stri
 
     const progression = await ProgressService.getExerciseProgression(
       session.user.id,
-      params.exerciseId
+      exerciseId
     );
 
     return NextResponse.json({ progression }, { status: 200 });

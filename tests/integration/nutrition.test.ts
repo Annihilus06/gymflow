@@ -186,7 +186,7 @@ describe('Nutrition & Targets Integration Tests', () => {
         method: 'DELETE',
       });
 
-      const res = await deleteMealRoute(req, { params: { id: 'meal_1' } });
+      const res = await deleteMealRoute(req, { params: Promise.resolve({ id: 'meal_1' }) });
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.success).toBe(true);

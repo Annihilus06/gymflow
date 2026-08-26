@@ -69,8 +69,13 @@ export default function RegisterPage() {
 
       router.push('/onboarding');
       router.refresh();
-    } catch {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
+        return;
+      }
+      setErrorMessage(
+        err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
+      );
       setIsLoading(false);
     }
   };

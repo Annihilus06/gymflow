@@ -196,7 +196,7 @@ describe('Workout Session & Execution Integration Tests', () => {
       });
 
       const res = await logSetRoute(req, {
-        params: { id: 'session_1', exerciseLogId: 'exlog_1' },
+        params: Promise.resolve({ id: 'session_1', exerciseLogId: 'exlog_1' }),
       });
       expect(res.status).toBe(201);
       const json = await res.json();
@@ -230,7 +230,7 @@ describe('Workout Session & Execution Integration Tests', () => {
       });
 
       const res = await logSetRoute(req, {
-        params: { id: 'session_1', exerciseLogId: 'exlog_1' },
+        params: Promise.resolve({ id: 'session_1', exerciseLogId: 'exlog_1' }),
       });
       expect(res.status).toBe(201);
       const json = await res.json();
@@ -256,7 +256,7 @@ describe('Workout Session & Execution Integration Tests', () => {
         body: JSON.stringify({ actualReps: 10, weightKg: 85 }),
       });
 
-      const res = await updateSetRoute(req, { params: { id: 'session_1', setId: 'set_1' } });
+      const res = await updateSetRoute(req, { params: Promise.resolve({ id: 'session_1', setId: 'set_1' }) });
       expect(res.status).toBe(200);
     });
 
@@ -271,7 +271,7 @@ describe('Workout Session & Execution Integration Tests', () => {
         method: 'DELETE',
       });
 
-      const res = await deleteSetRoute(req, { params: { id: 'session_1', setId: 'set_1' } });
+      const res = await deleteSetRoute(req, { params: Promise.resolve({ id: 'session_1', setId: 'set_1' }) });
       expect(res.status).toBe(200);
       expect(mockPrisma.setLog.delete).toHaveBeenCalledWith({ where: { id: 'set_1' } });
     });
@@ -305,7 +305,7 @@ describe('Workout Session & Execution Integration Tests', () => {
         body: JSON.stringify({ durationSecs: 2400 }),
       });
 
-      const res = await finishSessionRoute(req, { params: { id: 'session_1' } });
+      const res = await finishSessionRoute(req, { params: Promise.resolve({ id: 'session_1' }) });
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.status).toBe('COMPLETED');
@@ -326,7 +326,7 @@ describe('Workout Session & Execution Integration Tests', () => {
         method: 'POST',
       });
 
-      const res = await abandonSessionRoute(req, { params: { id: 'session_1' } });
+      const res = await abandonSessionRoute(req, { params: Promise.resolve({ id: 'session_1' }) });
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.status).toBe('ABANDONED');
@@ -355,7 +355,7 @@ describe('Workout Session & Execution Integration Tests', () => {
       mockPrisma.workoutSession.findFirst.mockResolvedValueOnce(null);
 
       const req = new Request('http://localhost:3000/api/sessions/victim_session');
-      const res = await getSessionByIdRoute(req, { params: { id: 'victim_session' } });
+      const res = await getSessionByIdRoute(req, { params: Promise.resolve({ id: 'victim_session' }) });
       expect(res.status).toBe(404);
       const json = await res.json();
       expect(json.code).toBe('NOT_FOUND');

@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
@@ -19,7 +20,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:seed": "node --loader ts-node/esm prisma/seed.ts"
+    "db:seed": "node --loader ts-node/esm prisma/seed.ts",
+    "db:local:start": "wsl -d Ubuntu -u root -e service postgresql start",
+    "db:local:status": "wsl -d Ubuntu -u root -e service postgresql status"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -38,7 +41,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
-    "next": "^14.2.20",
+    "next": "^16.3.3",
     "next-auth": "^5.0.0-beta.32",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -60,10 +63,10 @@
     "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.67.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^14.2.20",
+    "eslint-config-next": "^16.3.3",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
@@ -73,6 +76,6 @@
     "tailwindcss": "^3.4.16",
     "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.11"
   }
 }

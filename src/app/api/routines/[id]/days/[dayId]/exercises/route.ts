@@ -7,16 +7,17 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string; dayId: string } }
+  { params }: { params: Promise<{ id: string; dayId: string }> }
 ) {
   try {
+    const { id, dayId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
     }
 
-    const routine = await RoutineService.getRoutineById(session.user.id, params.id);
-    const day = routine.days.find((d) => d.id === params.dayId);
+    const routine = await RoutineService.getRoutineById(session.user.id, id);
+    const day = routine.days.find((d) => d.id === dayId);
     if (!day) {
       return handleApiError(AppError.notFound('Routine day not found.'));
     }
@@ -29,9 +30,10 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string; dayId: string } }
+  { params }: { params: Promise<{ id: string; dayId: string }> }
 ) {
   try {
+    const { id, dayId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -45,8 +47,8 @@ export async function POST(
 
     const created = await RoutineService.addExerciseToDay(
       session.user.id,
-      params.id,
-      params.dayId,
+      id,
+      dayId,
       parsed.data
     );
     return NextResponse.json(created, { status: 201 });

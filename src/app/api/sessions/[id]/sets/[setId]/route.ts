@@ -7,9 +7,10 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string; setId: string } }
+  { params }: { params: Promise<{ id: string; setId: string }> }
 ) {
   try {
+    const { id, setId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -25,8 +26,8 @@ export async function PATCH(
 
     const updated = await SessionService.updateSet(
       session.user.id,
-      params.id,
-      params.setId,
+      id,
+      setId,
       parsed.data
     );
 
@@ -38,15 +39,16 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string; setId: string } }
+  { params }: { params: Promise<{ id: string; setId: string }> }
 ) {
   try {
+    const { id, setId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
     }
 
-    const result = await SessionService.deleteSet(session.user.id, params.id, params.setId);
+    const result = await SessionService.deleteSet(session.user.id, id, setId);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     return handleApiError(error);

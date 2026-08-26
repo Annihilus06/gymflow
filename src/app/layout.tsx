@@ -1,5 +1,7 @@
+import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { Providers } from '@/components/providers';
 
 export const metadata: Metadata = {
   title: 'GymFlow — Smart Workout Tracker & Fitness Planner',
@@ -33,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="antialiased selection:bg-primary/20 selection:text-primary">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

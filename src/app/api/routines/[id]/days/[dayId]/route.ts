@@ -7,9 +7,10 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string; dayId: string } }
+  { params }: { params: Promise<{ id: string; dayId: string }> }
 ) {
   try {
+    const { id, dayId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -23,8 +24,8 @@ export async function PATCH(
 
     const updated = await RoutineService.updateRoutineDay(
       session.user.id,
-      params.id,
-      params.dayId,
+      id,
+      dayId,
       parsed.data
     );
     return NextResponse.json(updated, { status: 200 });

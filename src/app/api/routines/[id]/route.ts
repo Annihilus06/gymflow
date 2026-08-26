@@ -7,15 +7,16 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
     }
 
-    const routine = await RoutineService.getRoutineById(session.user.id, params.id);
+    const routine = await RoutineService.getRoutineById(session.user.id, id);
     return NextResponse.json(routine, { status: 200 });
   } catch (error) {
     return handleApiError(error);
@@ -24,9 +25,10 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -38,7 +40,7 @@ export async function PATCH(
       return handleApiError(parsed.error);
     }
 
-    const updated = await RoutineService.updateRoutine(session.user.id, params.id, parsed.data);
+    const updated = await RoutineService.updateRoutine(session.user.id, id, parsed.data);
     return NextResponse.json(updated, { status: 200 });
   } catch (error) {
     return handleApiError(error);
@@ -47,15 +49,16 @@ export async function PATCH(
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
     }
 
-    const result = await RoutineService.deleteRoutine(session.user.id, params.id);
+    const result = await RoutineService.deleteRoutine(session.user.id, id);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     return handleApiError(error);

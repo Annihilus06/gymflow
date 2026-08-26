@@ -224,7 +224,7 @@ describe('Routine Integration & Security Tests', () => {
       mockPrisma.routine.findFirst.mockResolvedValueOnce(mockDbRoutine);
 
       const res = await getRoutineByIdRoute(new Request('http://localhost:3000'), {
-        params: { id: 'routine_1' },
+        params: Promise.resolve({ id: 'routine_1' }),
       });
       expect(res.status).toBe(200);
 
@@ -248,7 +248,7 @@ describe('Routine Integration & Security Tests', () => {
         body: JSON.stringify({ name: 'Updated Routine Name' }),
       });
 
-      const res = await updateRoutineRoute(request, { params: { id: 'routine_1' } });
+      const res = await updateRoutineRoute(request, { params: Promise.resolve({ id: 'routine_1' }) });
       expect(res.status).toBe(200);
     });
   });
@@ -259,7 +259,7 @@ describe('Routine Integration & Security Tests', () => {
       mockPrisma.routine.findFirst.mockResolvedValue(mockDbRoutine);
 
       const res = await activateRoutineRoute(new Request('http://localhost:3000', { method: 'POST' }), {
-        params: { id: 'routine_1' },
+        params: Promise.resolve({ id: 'routine_1' }),
       });
       expect(res.status).toBe(200);
       expect(mockPrisma.routine.updateMany).toHaveBeenCalledWith({
@@ -283,7 +283,7 @@ describe('Routine Integration & Security Tests', () => {
         body: JSON.stringify({ name: 'Cloned PPL Split' }),
       });
 
-      const res = await duplicateRoutineRoute(request, { params: { id: 'routine_1' } });
+      const res = await duplicateRoutineRoute(request, { params: Promise.resolve({ id: 'routine_1' }) });
       expect(res.status).toBe(201);
     });
   });
@@ -301,7 +301,7 @@ describe('Routine Integration & Security Tests', () => {
         body: JSON.stringify({ label: 'Heavy Chest', isRestDay: false }),
       });
 
-      const res = await updateRoutineDayRoute(request, { params: { id: 'routine_1', dayId: 'day_mon' } });
+      const res = await updateRoutineDayRoute(request, { params: Promise.resolve({ id: 'routine_1', dayId: 'day_mon' }) });
       expect(res.status).toBe(200);
     });
 
@@ -328,7 +328,7 @@ describe('Routine Integration & Security Tests', () => {
         }),
       });
 
-      const res = await addExerciseRoute(request, { params: { id: 'routine_1', dayId: 'day_mon' } });
+      const res = await addExerciseRoute(request, { params: Promise.resolve({ id: 'routine_1', dayId: 'day_mon' }) });
       expect(res.status).toBe(201);
     });
 
@@ -346,7 +346,7 @@ describe('Routine Integration & Security Tests', () => {
         body: JSON.stringify({ exerciseIds: ['rde_2', 'rde_1'] }),
       });
 
-      const res = await reorderExercisesRoute(request, { params: { id: 'routine_1', dayId: 'day_mon' } });
+      const res = await reorderExercisesRoute(request, { params: Promise.resolve({ id: 'routine_1', dayId: 'day_mon' }) });
       expect(res.status).toBe(200);
     });
 
@@ -357,7 +357,7 @@ describe('Routine Integration & Security Tests', () => {
       mockPrisma.routineDayExercise.findMany.mockResolvedValueOnce([]);
 
       const res = await removeExerciseRoute(new Request('http://localhost:3000', { method: 'DELETE' }), {
-        params: { id: 'routine_1', dayId: 'day_mon', exerciseId: 'rde_1' },
+        params: Promise.resolve({ id: 'routine_1', dayId: 'day_mon', exerciseId: 'rde_1' }),
       });
       expect(res.status).toBe(200);
     });
@@ -369,7 +369,7 @@ describe('Routine Integration & Security Tests', () => {
       mockPrisma.routine.findFirst.mockResolvedValueOnce({ id: 'routine_1', isActive: false });
 
       const res = await deleteRoutineRoute(new Request('http://localhost:3000', { method: 'DELETE' }), {
-        params: { id: 'routine_1' },
+        params: Promise.resolve({ id: 'routine_1' }),
       });
       expect(res.status).toBe(200);
       expect(mockPrisma.routine.delete).toHaveBeenCalledWith({ where: { id: 'routine_1' } });
@@ -387,7 +387,7 @@ describe('Routine Integration & Security Tests', () => {
       });
 
       const res = await getRoutineByIdRoute(new Request('http://localhost:3000'), {
-        params: { id: 'victim_routine_id' },
+        params: Promise.resolve({ id: 'victim_routine_id' }),
       });
       expect(res.status).toBe(404);
       const json = await res.json();

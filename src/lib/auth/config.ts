@@ -5,6 +5,7 @@ import { AuthService } from '@/lib/services/auth.service';
 import { loginSchema } from '@/lib/validations/auth.schema';
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   pages: {
     signIn: '/login',
     newUser: '/onboarding',
@@ -58,12 +59,11 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        token.onboardingComplete = (user as any).onboardingComplete ?? false;
+        token.onboardingComplete = user.onboardingComplete ?? false;
       }
 
       if (trigger === 'update' && session?.onboardingComplete !== undefined) {
-        token.onboardingComplete = session.onboardingComplete;
+        token.onboardingComplete = session.onboardingComplete as boolean;
       }
 
       return token;
@@ -71,11 +71,13 @@ export const authConfig: NextAuthConfig = {
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).onboardingComplete = token.onboardingComplete as boolean;
+        session.user.onboardingComplete = token.onboardingComplete as boolean;
       }
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || 'gymflow-dev-secret-at-least-32-chars-key-abc123',
+  secret:
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    'gymflow-dev-secret-at-least-32-chars-key-abc123',
 };

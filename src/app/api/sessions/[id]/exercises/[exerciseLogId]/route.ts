@@ -7,9 +7,10 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string; exerciseLogId: string } }
+  { params }: { params: Promise<{ id: string; exerciseLogId: string }> }
 ) {
   try {
+    const { id, exerciseLogId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -25,8 +26,8 @@ export async function PATCH(
 
     const updated = await SessionService.updateExerciseLog(
       session.user.id,
-      params.id,
-      params.exerciseLogId,
+      id,
+      exerciseLogId,
       parsed.data
     );
 

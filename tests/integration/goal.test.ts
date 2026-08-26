@@ -181,7 +181,7 @@ describe('Goal Management Integration Tests', () => {
         body: JSON.stringify({ currentValue: 80 }),
       });
 
-      const res = await updateProgressRoute(req, { params: { id: 'goal_active_1' } });
+      const res = await updateProgressRoute(req, { params: Promise.resolve({ id: 'goal_active_1' }) });
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.status).toBe('COMPLETED');
@@ -202,7 +202,7 @@ describe('Goal Management Integration Tests', () => {
         method: 'POST',
       });
 
-      const res = await cancelGoalRoute(req, { params: { id: 'goal_active_1' } });
+      const res = await cancelGoalRoute(req, { params: Promise.resolve({ id: 'goal_active_1' }) });
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.status).toBe('ARCHIVED');
@@ -220,7 +220,7 @@ describe('Goal Management Integration Tests', () => {
         body: JSON.stringify({ title: 'Hacked Goal' }),
       });
 
-      const res = await updateGoalRoute(req, { params: { id: 'victim_goal' } });
+      const res = await updateGoalRoute(req, { params: Promise.resolve({ id: 'victim_goal' }) });
       expect(res.status).toBe(404);
       const json = await res.json();
       expect(json.code).toBe('NOT_FOUND');

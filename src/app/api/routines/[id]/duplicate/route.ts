@@ -7,9 +7,10 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -26,7 +27,7 @@ export async function POST(
       // Body is optional for duplicate
     }
 
-    const cloned = await RoutineService.duplicateRoutine(session.user.id, params.id, duplicateName);
+    const cloned = await RoutineService.duplicateRoutine(session.user.id, id, duplicateName);
     return NextResponse.json(cloned, { status: 201 });
   } catch (error) {
     return handleApiError(error);

@@ -7,9 +7,10 @@ import { handleApiError } from '@/lib/errors/handle-api-error';
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string; exerciseLogId: string } }
+  { params }: { params: Promise<{ id: string; exerciseLogId: string }> }
 ) {
   try {
+    const { id, exerciseLogId } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -30,8 +31,8 @@ export async function POST(
 
     const setLog = await SessionService.logSet(
       session.user.id,
-      params.id,
-      params.exerciseLogId,
+      id,
+      exerciseLogId,
       parsed.data
     );
 

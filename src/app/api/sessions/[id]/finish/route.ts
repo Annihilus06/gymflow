@@ -5,8 +5,9 @@ import { finishSessionSchema } from '@/lib/validations/session.schema';
 import { AppError } from '@/lib/errors/app-error';
 import { handleApiError } from '@/lib/errors/handle-api-error';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -26,7 +27,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       // Body optional
     }
 
-    const finishedSession = await SessionService.finishSession(session.user.id, params.id, inputData);
+    const finishedSession = await SessionService.finishSession(session.user.id, id, inputData);
     return NextResponse.json(finishedSession, { status: 200 });
   } catch (error) {
     return handleApiError(error);

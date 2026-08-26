@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,9 +82,11 @@ interface RoutineDetailData {
   days: RoutineDayData[];
 }
 
-function RoutineDetailContent({ routineId }: { routineId: string }) {
+function RoutineDetailContent() {
   const router = useRouter();
+  const params = useParams();
   const searchParams = useSearchParams();
+  const routineId = (params?.id as string) || '';
   const initialDay = searchParams.get('day') || 'MONDAY';
 
   const [routine, setRoutine] = useState<RoutineDetailData | null>(null);
@@ -935,7 +937,7 @@ function RoutineDetailContent({ routineId }: { routineId: string }) {
   );
 }
 
-export default function RoutineDetailPage({ params }: { params: { id: string } }) {
+export default function RoutineDetailPage() {
   return (
     <Suspense
       fallback={
@@ -944,7 +946,7 @@ export default function RoutineDetailPage({ params }: { params: { id: string } }
         </div>
       }
     >
-      <RoutineDetailContent routineId={params.id} />
+      <RoutineDetailContent />
     </Suspense>
   );
 }

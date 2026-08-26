@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Scale, Flame, Activity, ChevronRight } from 'lucide-react';
 import type { UserProfileResponse } from '@/lib/services/profile.service';

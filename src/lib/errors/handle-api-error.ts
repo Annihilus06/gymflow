@@ -43,7 +43,7 @@ export function handleApiError(error: unknown, requestId?: string): NextResponse
       return NextResponse.json(
         {
           code: 'CONFLICT',
-          message: `A conflict occurred with unique field(s): ${target}.`,
+          message: `An account or record with this unique ${target} already exists.`,
           requestId: reqId,
         },
         { status: 409 }
@@ -57,6 +57,17 @@ export function handleApiError(error: unknown, requestId?: string): NextResponse
           requestId: reqId,
         },
         { status: 404 }
+      );
+    }
+    if (['P1000', 'P1001', 'P1002', 'P1003', 'P1017'].includes(prismaError.code)) {
+      return NextResponse.json(
+        {
+          code: 'DATABASE_UNAVAILABLE',
+          message:
+            'Unable to connect to the database. Please verify the database server is running and DATABASE_URL is configured correctly.',
+          requestId: reqId,
+        },
+        { status: 503 }
       );
     }
   }

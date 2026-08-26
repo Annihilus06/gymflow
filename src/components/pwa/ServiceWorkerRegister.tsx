@@ -14,7 +14,7 @@ export function ServiceWorkerRegister() {
               installingWorker.onstatechange = () => {
                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   // New update available
-                  console.log('GymFlow PWA update available.');
+                  console.info('GymFlow PWA update available.');
                 }
               };
             }

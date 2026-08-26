@@ -186,7 +186,7 @@ describe('Progress & Analytics Engine Integration Tests', () => {
       ]);
 
       const req = new Request('http://localhost:3000/api/stats/progression/ex_bench');
-      const res = await getProgressionRoute(req, { params: { exerciseId: 'ex_bench' } });
+      const res = await getProgressionRoute(req, { params: Promise.resolve({ exerciseId: 'ex_bench' }) });
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.progression).toHaveLength(2);

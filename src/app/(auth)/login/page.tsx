@@ -45,15 +45,26 @@ function LoginForm() {
       });
 
       if (!res || res.error) {
-        setErrorMessage('Invalid email or password. Please try again.');
+        setErrorMessage(
+          res?.error === 'CredentialsSignin'
+            ? 'Invalid email or password. Please check your credentials.'
+            : res?.error || 'Invalid email or password. Please try again.'
+        );
         setIsLoading(false);
         return;
       }
 
       router.push(callbackUrl);
       router.refresh();
-    } catch {
-      setErrorMessage('An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('NEXT_REDIRECT')) {
+        return;
+      }
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : 'Invalid email or password. Please check your credentials.'
+      );
       setIsLoading(false);
     }
   };

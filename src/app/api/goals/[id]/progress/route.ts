@@ -5,8 +5,9 @@ import { updateGoalProgressSchema } from '@/lib/validations/goal.schema';
 import { AppError } from '@/lib/errors/app-error';
 import { handleApiError } from '@/lib/errors/handle-api-error';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return handleApiError(AppError.unauthorized());
@@ -20,7 +21,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       );
     }
 
-    const updated = await GoalService.updateGoalProgress(session.user.id, params.id, parsed.data);
+    const updated = await GoalService.updateGoalProgress(session.user.id, id, parsed.data);
     return NextResponse.json(updated, { status: 200 });
   } catch (error) {
     return handleApiError(error);
