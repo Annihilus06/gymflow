@@ -1,20 +1,35 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AnatomicalBody } from '@/components/dashboard/AnatomicalBody';
 import { Dumbbell } from 'lucide-react';
 
+const MUSCLE_WIKI_TARGETS: Record<string, string> = {
+  Chest: 'chest',
+  Shoulders: 'shoulders',
+  Biceps: 'biceps',
+  Triceps: 'triceps',
+  Abs: 'abdominals',
+  Quads: 'quads',
+  Back: 'lats',
+  Glutes: 'glutes',
+  Hamstrings: 'hamstrings',
+  Calves: 'calves',
+  Traps: 'traps',
+  Forearms: 'forearms',
+};
+
 export function MuscleWikiExplorer() {
-  const router = useRouter();
   const [selectedMuscle, setSelectedMuscle] = useState<string>('Chest');
   const [bodyView, setBodyView] = useState<'FRONT' | 'BACK'>('FRONT');
 
   const handleSelectMuscle = (muscleName: string) => {
     setSelectedMuscle(muscleName);
-    router.push(`/exercises?muscle=${encodeURIComponent(muscleName)}`);
+    const targetSlug = MUSCLE_WIKI_TARGETS[muscleName] || muscleName.toLowerCase();
+    const targetUrl = `https://musclewiki.com/exercises/${targetSlug}`;
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -28,11 +43,11 @@ export function MuscleWikiExplorer() {
             </div>
             <h3 className="text-base font-black text-foreground">Interactive Muscle Wiki</h3>
             <Badge variant="outline" className="text-[10px] font-black uppercase text-primary border-primary/30">
-              Visual Map
+              Live Map
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Click any body part to explore all target exercises and execution form videos.
+            Click any body part to explore all target exercises on MuscleWiki.
           </p>
         </div>
 
