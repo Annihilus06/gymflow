@@ -6,7 +6,6 @@ import {
   Target,
   Utensils,
   BookOpen,
-  History,
   Settings,
 } from 'lucide-react';
 
@@ -66,11 +65,6 @@ export const DESKTOP_NAV_ITEMS: NavItem[] = [
     label: 'Calendar',
     href: '/calendar',
     icon: Calendar,
-  },
-  {
-    label: 'History',
-    href: '/history',
-    icon: History,
   },
   {
     label: 'Exercise Library',
