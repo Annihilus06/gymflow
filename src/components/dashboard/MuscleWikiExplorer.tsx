@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AnatomicalBody } from '@/components/dashboard/AnatomicalBody';
 import { FormVideoGuideModal } from '@/components/exercises/FormVideoGuideModal';
-import { Dumbbell, Play, Sparkles, Loader2, Video, CheckCircle2 } from 'lucide-react';
+import { Dumbbell, Play, Sparkles, Loader2 } from 'lucide-react';
 
 interface MuscleGroupOption {
   id: string;
@@ -40,10 +40,62 @@ interface ExerciseItem {
   instructions?: string[];
 }
 
+// Built-in baseline exercises mapped to anatomical muscles
+const DEFAULT_MUSCLE_EXERCISES: Record<string, ExerciseItem[]> = {
+  Chest: [
+    { id: 'c1', name: 'Barbell Bench Press', category: 'Strength', primaryMuscle: 'Chest', equipment: 'Barbell', instructions: ['Retract shoulder blades', 'Lower bar to mid-chest with control', 'Drive up through palms'] },
+    { id: 'c2', name: 'Incline Dumbbell Press', category: 'Hypertrophy', primaryMuscle: 'Chest', equipment: 'Dumbbells', instructions: ['Set bench to 30-45 degrees', 'Press dumbbells up and slightly inward', 'Control the stretch at the bottom'] },
+    { id: 'c3', name: 'Cable Chest Fly', category: 'Isolation', primaryMuscle: 'Chest', equipment: 'Cable Machine', instructions: ['Slight bend in elbows', 'Bring handles together in front of chest', 'Squeeze pectorals at peak contraction'] },
+    { id: 'c4', name: 'Dips (Chest Focus)', category: 'Bodyweight', primaryMuscle: 'Chest', equipment: 'Dip Station', instructions: ['Lean torso slightly forward', 'Lower until elbows reach 90 degrees', 'Press up firmly'] },
+  ],
+  Shoulders: [
+    { id: 's1', name: 'Overhead Barbell Press', category: 'Strength', primaryMuscle: 'Shoulders', equipment: 'Barbell', instructions: ['Brace core and glutes', 'Press bar vertically overhead', 'Lock out with head moving forward through window'] },
+    { id: 's2', name: 'Dumbbell Lateral Raise', category: 'Isolation', primaryMuscle: 'Shoulders', equipment: 'Dumbbells', instructions: ['Lead with elbows slightly forward in scapular plane', 'Raise to shoulder height', 'Control the 2-second negative'] },
+    { id: 's3', name: 'Face Pulls', category: 'Rehab / Upper', primaryMuscle: 'Shoulders', equipment: 'Cable Machine', instructions: ['Pull rope to eye level', 'Externally rotate shoulders at finish', 'Squeeze rear delts'] },
+  ],
+  Back: [
+    { id: 'b1', name: 'Barbell Deadlift', category: 'Strength', primaryMuscle: 'Back', equipment: 'Barbell', instructions: ['Hips back, flat spine', 'Drive through floor with mid-foot', 'Lock out hips and lats at top'] },
+    { id: 'b2', name: 'Lat Pulldown', category: 'Hypertrophy', primaryMuscle: 'Back', equipment: 'Cable Machine', instructions: ['Grip slightly wider than shoulders', 'Pull bar to upper chest', 'Drive elbows down and back'] },
+    { id: 'b3', name: 'Seated Cable Row', category: 'Hypertrophy', primaryMuscle: 'Back', equipment: 'Cable Machine', instructions: ['Keep torso upright', 'Pull handle to navel', 'Retract scapulae firmly'] },
+  ],
+  Biceps: [
+    { id: 'bi1', name: 'Barbell Bicep Curl', category: 'Hypertrophy', primaryMuscle: 'Biceps', equipment: 'Barbell', instructions: ['Keep elbows pinned at sides', 'Curl bar up without swinging torso', 'Squeeze biceps at top'] },
+    { id: 'bi2', name: 'Incline Dumbbell Curl', category: 'Isolation', primaryMuscle: 'Biceps', equipment: 'Dumbbells', instructions: ['Sit back on 45-degree incline', 'Full stretch at bottom', 'Supinate wrists as you curl up'] },
+    { id: 'bi3', name: 'Hammer Curls', category: 'Hypertrophy', primaryMuscle: 'Biceps', equipment: 'Dumbbells', instructions: ['Neutral palms facing inward', 'Curl up emphasizing brachialis', 'Control the descent'] },
+  ],
+  Triceps: [
+    { id: 't1', name: 'Tricep Rope Pushdown', category: 'Isolation', primaryMuscle: 'Triceps', equipment: 'Cable Machine', instructions: ['Keep upper arms stationary', 'Extend elbows fully downwards', 'Spread rope apart at bottom'] },
+    { id: 't2', name: 'Skull Crushers (EZ Bar)', category: 'Hypertrophy', primaryMuscle: 'Triceps', equipment: 'EZ Bar', instructions: ['Lower bar towards forehead or crown', 'Keep elbows pointed upwards', 'Extend elbows to lock out'] },
+    { id: 't3', name: 'Overhead Tricep Extension', category: 'Hypertrophy', primaryMuscle: 'Triceps', equipment: 'Dumbbell', instructions: ['Press dumbbell overhead', 'Lower behind neck stretching long head', 'Press back up to lockout'] },
+  ],
+  Abs: [
+    { id: 'a1', name: 'Hanging Leg Raise', category: 'Core', primaryMuscle: 'Abs', equipment: 'Pull-up Bar', instructions: ['Hang from bar with overhand grip', 'Raise legs towards chest without excessive swing', 'Lower with control'] },
+    { id: 'a2', name: 'Cable Woodchopper', category: 'Core / Obliques', primaryMuscle: 'Abs', equipment: 'Cable Machine', instructions: ['Rotate torso across body using obliques', 'Keep arms extended', 'Slowly return to start'] },
+    { id: 'a3', name: 'Plank Hold', category: 'Endurance', primaryMuscle: 'Abs', equipment: 'Bodyweight', instructions: ['Forearms on floor, glutes squeezed', 'Maintain neutral spine from head to heels', 'Hold for target duration'] },
+  ],
+  Quads: [
+    { id: 'q1', name: 'Barbell Back Squat', category: 'Strength', primaryMuscle: 'Quads', equipment: 'Barbell', instructions: ['Feet shoulder-width apart', 'Descend until hip crease is below parallel', 'Drive through mid-foot to stand'] },
+    { id: 'q2', name: 'Leg Press', category: 'Hypertrophy', primaryMuscle: 'Quads', equipment: 'Leg Press Machine', instructions: ['Feet shoulder-width on platform', 'Lower platform to 90 degrees knee flexion', 'Press up without locking knees abruptly'] },
+    { id: 'q3', name: 'Leg Extension', category: 'Isolation', primaryMuscle: 'Quads', equipment: 'Machine', instructions: ['Extend legs fully upwards', 'Pause for 1 second at top contraction', 'Lower with 2-second negative'] },
+  ],
+  Hamstrings: [
+    { id: 'h1', name: 'Romanian Deadlift (RDL)', category: 'Strength', primaryMuscle: 'Hamstrings', equipment: 'Barbell', instructions: ['Hinge at hips with soft knees', 'Lower bar along shins feeling deep stretch', 'Contract glutes and hamstrings to return'] },
+    { id: 'h2', name: 'Lying Leg Curl', category: 'Isolation', primaryMuscle: 'Hamstrings', equipment: 'Machine', instructions: ['Curl pad towards glutes', 'Keep hips flat on bench', 'Lower slowly resisting the weight'] },
+  ],
+  Glutes: [
+    { id: 'g1', name: 'Barbell Hip Thrust', category: 'Hypertrophy', primaryMuscle: 'Glutes', equipment: 'Barbell', instructions: ['Upper back supported against bench', 'Drive hips upward into full extension', 'Squeeze glutes hard at top'] },
+    { id: 'g2', name: 'Bulgarian Split Squat', category: 'Unilateral', primaryMuscle: 'Glutes', equipment: 'Dumbbells', instructions: ['Rear foot elevated on bench', 'Descend until front thigh is parallel', 'Drive through front heel'] },
+  ],
+  Calves: [
+    { id: 'cal1', name: 'Standing Calf Raise', category: 'Isolation', primaryMuscle: 'Calves', equipment: 'Machine', instructions: ['Elevate balls of feet on platform', 'Lower heels for full stretch', 'Drive up on toes and hold peak contraction'] },
+    { id: 'cal2', name: 'Seated Calf Raise', category: 'Isolation', primaryMuscle: 'Calves', equipment: 'Machine', instructions: ['Sit with knees bent 90 degrees', 'Lower heels deep below platform', 'Raise high targeting soleus'] },
+  ],
+};
+
 export function MuscleWikiExplorer() {
   const [selectedMuscle, setSelectedMuscle] = useState<string>('Chest');
   const [bodyView, setBodyView] = useState<'FRONT' | 'BACK'>('FRONT');
-  const [exercises, setExercises] = useState<ExerciseItem[]>([]);
+  const [exercises, setExercises] = useState<ExerciseItem[]>(DEFAULT_MUSCLE_EXERCISES['Chest'] ?? []);
   const [isLoading, setIsLoading] = useState(false);
   const [videoModalData, setVideoModalData] = useState<{
     isOpen: boolean;
@@ -69,27 +121,24 @@ export function MuscleWikiExplorer() {
     async function loadExercises() {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/exercises?muscle=${encodeURIComponent(selectedMuscle)}`);
+        const res = await fetch(`/api/exercises?muscleGroup=${encodeURIComponent(selectedMuscle)}`);
         if (res.ok) {
-          const data = await res.json();
-          setExercises(data);
-        } else {
-          const allRes = await fetch('/api/exercises');
-          if (allRes.ok) {
-            const allData: ExerciseItem[] = await allRes.json();
-            const filtered = allData.filter(
-              (e) =>
-                e.primaryMuscle?.toLowerCase().includes(selectedMuscle.toLowerCase()) ||
-                e.name.toLowerCase().includes(selectedMuscle.toLowerCase())
-            );
-            setExercises(filtered.length > 0 ? filtered : allData.slice(0, 4));
+          const json = await res.json();
+          const items: ExerciseItem[] = Array.isArray(json) ? json : json.items ?? [];
+          if (items.length > 0) {
+            setExercises(items);
+            return;
           }
         }
       } catch {
-        // Fallback gracefully
+        // Use default static fallback
       } finally {
         setIsLoading(false);
       }
+
+      // Fallback to built-in exercises for this muscle
+      const fallback = DEFAULT_MUSCLE_EXERCISES[selectedMuscle] ?? DEFAULT_MUSCLE_EXERCISES['Chest'] ?? [];
+      setExercises(fallback);
     }
 
     loadExercises();
@@ -105,6 +154,8 @@ export function MuscleWikiExplorer() {
 
   const activeMuscleConfig: MuscleGroupOption =
     MUSCLE_GROUPS.find((m) => m.id.toLowerCase() === selectedMuscle.toLowerCase()) ?? DEFAULT_MUSCLE_CONFIG;
+
+  const exerciseList = Array.isArray(exercises) ? exercises : [];
 
   return (
     <Card className="relative overflow-hidden border-border/80 bg-card shadow-sm rounded-2xl">
@@ -206,7 +257,7 @@ export function MuscleWikiExplorer() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  Exercises for {activeMuscleConfig.name} ({exercises.length})
+                  Exercises for {activeMuscleConfig.name} ({exerciseList.length})
                 </span>
               </div>
 
@@ -214,13 +265,13 @@ export function MuscleWikiExplorer() {
                 <div className="flex min-h-[160px] items-center justify-center">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
-              ) : exercises.length === 0 ? (
+              ) : exerciseList.length === 0 ? (
                 <div className="p-6 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
                   No exercises found for {activeMuscleConfig.name}.
                 </div>
               ) : (
                 <div className="grid gap-2 sm:grid-cols-2 max-h-[280px] overflow-y-auto pr-1">
-                  {exercises.map((ex) => (
+                  {exerciseList.map((ex) => (
                     <div
                       key={ex.id}
                       className="flex flex-col justify-between p-3 rounded-xl border border-border/70 bg-card hover:border-primary/40 transition-colors space-y-2.5 shadow-sm"

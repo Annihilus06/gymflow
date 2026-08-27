@@ -122,7 +122,7 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
         </div>
 
         {/* Visual Exercise Mini-Grid */}
-        {todayDay && todayDay.exercises.length > 0 && (
+        {todayDay && Array.isArray(todayDay.exercises) && todayDay.exercises.length > 0 && (
           <div className="grid gap-2 sm:grid-cols-2 pt-1">
             {todayDay.exercises.slice(0, 4).map((ex: CalendarExerciseItem, i: number) => (
               <div
