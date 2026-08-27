@@ -16,7 +16,7 @@ describe('Dashboard Modular UI Components', () => {
     it('renders empty routine state with CTA when user has no active routine', () => {
       render(<TodayWorkoutCard hasActiveRoutine={false} />);
       expect(screen.getByText(/Ready to Train/i)).toBeInTheDocument();
-      expect(screen.getByText(/Start Workout/i)).toBeInTheDocument();
+      expect(screen.getByText(/Complete/i)).toBeInTheDocument();
     });
 
     it('renders recovery card when today is a rest day', () => {
@@ -68,6 +68,7 @@ describe('Dashboard Modular UI Components', () => {
       expect(screen.getByText(/Push Day - Chest & Triceps/i)).toBeInTheDocument();
       expect(screen.getByText(/Barbell Bench Press/i)).toBeInTheDocument();
       expect(screen.getByText(/4 exercises/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Complete today's workout/i })).toBeInTheDocument();
     });
   });
 
