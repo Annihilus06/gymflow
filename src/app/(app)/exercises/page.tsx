@@ -20,6 +20,7 @@ import {
 import { MUSCLE_WIKI_DATABASE, type MuscleWikiExercise } from '@/data/musclewiki-exercises';
 import { CreateCustomExerciseModal } from '@/components/exercises/CreateCustomExerciseModal';
 import { FormVideoGuideModal } from '@/components/exercises/FormVideoGuideModal';
+import { GymFlowLoader } from '@/components/ui/GymFlowLoader';
 
 const MUSCLE_TABS = [
   'All',
@@ -366,7 +367,7 @@ function ExercisesContent() {
 
 export default function ExercisesPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-muted-foreground">Loading exercises...</div>}>
+    <Suspense fallback={<GymFlowLoader sublabel="Loading complete exercise library..." />}>
       <ExercisesContent />
     </Suspense>
   );
