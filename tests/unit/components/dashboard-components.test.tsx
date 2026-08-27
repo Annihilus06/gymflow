@@ -67,7 +67,7 @@ describe('Dashboard Modular UI Components', () => {
       render(<TodayWorkoutCard todayDay={workoutDay} hasActiveRoutine={true} />);
       expect(screen.getByText(/Push Day - Chest & Triceps/i)).toBeInTheDocument();
       expect(screen.getByText(/Barbell Bench Press/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Start today's workout/i })).toBeInTheDocument();
+      expect(screen.getByText(/4 exercises/i)).toBeInTheDocument();
     });
   });
 

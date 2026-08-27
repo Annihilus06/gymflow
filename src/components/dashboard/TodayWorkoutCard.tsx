@@ -91,34 +91,21 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
     <Card className="relative overflow-hidden border-primary/40 bg-gradient-to-br from-card via-card to-primary/10 shadow-md">
       <div className="p-5 sm:p-6 space-y-4">
         {/* Header Strip */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Badge variant="default" className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
-                TODAY&apos;S FOCUS
-              </Badge>
-              <span className="text-xs font-medium text-muted-foreground" suppressHydrationWarning>{formattedToday}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-              {todayDay?.label || 'Scheduled Workout'}
-            </h2>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground pt-0.5">
-              <span className="font-semibold text-primary">{todayDay?.exerciseCount || 0} exercises</span>
-              <span>•</span>
-              <span>~45 mins</span>
-            </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Badge variant="default" className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
+              TODAY&apos;S FOCUS
+            </Badge>
+            <span className="text-xs font-medium text-muted-foreground" suppressHydrationWarning>{formattedToday}</span>
           </div>
-
-          <Link href="/execute">
-            <Button
-              size="default"
-              className="gap-2 font-black shadow-lg shadow-primary/25 h-11 px-6 w-full sm:w-auto text-sm"
-              aria-label="Start today's workout"
-            >
-              <Play className="h-4 w-4 fill-current" />
-              Start Workout
-            </Button>
-          </Link>
+          <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+            {todayDay?.label || 'Scheduled Workout'}
+          </h2>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-0.5">
+            <span className="font-semibold text-primary">{todayDay?.exerciseCount || 0} exercises</span>
+            <span>•</span>
+            <span>~45 mins</span>
+          </div>
         </div>
 
         {/* Visual Exercise Mini-Grid */}
