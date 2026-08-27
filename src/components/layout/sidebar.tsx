@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { DESKTOP_NAV_ITEMS } from '@/constants/navigation';
 import { Dumbbell } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -48,8 +49,9 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-border p-4">
-        <p className="text-xs text-muted-foreground">GymFlow v1.0.0</p>
+      <div className="border-t border-border p-4 flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">GymFlow v1.0</p>
+        <ThemeToggle />
       </div>
     </aside>
   );

@@ -2,12 +2,16 @@
 
 import React from 'react';
 import { SessionProvider } from 'next-auth/react';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 /**
  * Root client-side providers wrapper.
- * SessionProvider is required for next-auth/react client hooks
- * (useSession, signIn, signOut) to function correctly.
+ * Integrates SessionProvider for authentication and ThemeProvider for Night/White mode.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <SessionProvider>
+      <ThemeProvider>{children}</ThemeProvider>
+    </SessionProvider>
+  );
 }

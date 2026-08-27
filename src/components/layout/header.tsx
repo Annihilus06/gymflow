@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Dumbbell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export function Header() {
   return (
@@ -18,11 +19,13 @@ export function Header() {
       </Link>
 
       <div className="flex items-center gap-2">
+        <ThemeToggle />
+
         <Link href="/settings" passHref>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-full"
+            className="h-8 w-8 rounded-full border border-border/60"
             aria-label="User Settings"
           >
             <User className="h-4 w-4" />
