@@ -4,9 +4,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, RefreshCw, Target, Activity, Flame, ChevronRight, Plus } from 'lucide-react';
+import { Target, Activity, Flame, ChevronRight, RefreshCw, AlertCircle } from 'lucide-react';
 import { TodayWorkoutCard } from '@/components/dashboard/TodayWorkoutCard';
 import { MuscleWikiExplorer } from '@/components/dashboard/MuscleWikiExplorer';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
@@ -21,40 +21,54 @@ export default function DashboardPage() {
   const [activeGoal, setActiveGoal] = useState<GoalWithCalculatedProgress | null>(null);
   const [weeklyStats, setWeeklyStats] = useState<ProgressSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
-    setHasError(false);
     try {
-      const [weekRes, profileRes, goalRes, statsRes] = await Promise.all([
+      const [weekRes, profileRes, goalRes, statsRes] = await Promise.allSettled([
         fetch('/api/calendar/week'),
         fetch('/api/profile'),
         fetch('/api/goals/active'),
         fetch('/api/stats?period=week'),
       ]);
 
-      if (weekRes.ok) {
-        const weekJson: WeeklyScheduleResponse = await weekRes.json();
-        setWeeklySchedule(weekJson);
+      if (weekRes.status === 'fulfilled' && weekRes.value.ok) {
+        try {
+          const weekJson: WeeklyScheduleResponse = await weekRes.value.json();
+          setWeeklySchedule(weekJson);
+        } catch {
+          // ignore
+        }
       }
 
-      if (profileRes.ok) {
-        const profileJson: UserProfileResponse = await profileRes.json();
-        setProfileData(profileJson);
+      if (profileRes.status === 'fulfilled' && profileRes.value.ok) {
+        try {
+          const profileJson: UserProfileResponse = await profileRes.value.json();
+          setProfileData(profileJson);
+        } catch {
+          // ignore
+        }
       }
 
-      if (goalRes.ok) {
-        const goalJson = await goalRes.json();
-        setActiveGoal(goalJson.activeGoal);
+      if (goalRes.status === 'fulfilled' && goalRes.value.ok) {
+        try {
+          const goalJson = await goalRes.value.json();
+          setActiveGoal(goalJson.activeGoal ?? null);
+        } catch {
+          // ignore
+        }
       }
 
-      if (statsRes.ok) {
-        const statsJson: ProgressSummary = await statsRes.json();
-        setWeeklyStats(statsJson);
+      if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
+        try {
+          const statsJson: ProgressSummary = await statsRes.value.json();
+          setWeeklyStats(statsJson);
+        } catch {
+          // ignore
+        }
       }
     } catch {
-      setHasError(true);
+      // Fallback
     } finally {
       setIsLoading(false);
     }
@@ -68,33 +82,7 @@ export default function DashboardPage() {
     return <DashboardSkeleton />;
   }
 
-  if (hasError) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[360px] text-center p-6 space-y-4 max-w-md mx-auto">
-        <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
-          <AlertCircle className="h-6 w-6" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-bold text-foreground">Failed to Load Dashboard</h2>
-          <p className="text-xs text-muted-foreground">
-            Encountered an issue fetching your fitness data. Please try again.
-          </p>
-        </div>
-        <Button
-          type="button"
-          onClick={loadDashboardData}
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs font-semibold"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
-  const todayDay = weeklySchedule?.days.find((d) => d.isToday);
+  const todayDay = weeklySchedule?.days?.find((d) => d.isToday);
   const formattedToday = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'short',
