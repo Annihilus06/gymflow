@@ -152,7 +152,7 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
             aria-label="Complete today's workout"
           >
             <CheckCircle2 className="h-4 w-4" />
-            {isCompleted ? 'Completed ✓' : 'Complete'}
+            {isCompleted ? 'Completed ✓' : 'Completed'}
           </Button>
         </div>
 
