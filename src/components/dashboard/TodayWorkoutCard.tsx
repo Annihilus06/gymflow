@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dumbbell, Moon, PlusCircle, Play, ChevronRight } from 'lucide-react';
+import { Dumbbell, Moon, PlusCircle, Play, ChevronRight, Zap, Sparkles } from 'lucide-react';
 import type { CalendarDayEvent, CalendarExerciseItem } from '@/lib/services/calendar.service';
 
 interface TodayWorkoutCardProps {
@@ -15,40 +15,40 @@ interface TodayWorkoutCardProps {
 
 export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCardProps) {
   const formattedToday = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
+    weekday: 'short',
     month: 'short',
     day: 'numeric',
   });
 
   if (!hasActiveRoutine) {
     return (
-      <Card className="border-border bg-gradient-to-br from-card via-card to-primary/5 p-5 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-1">
+      <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-card via-card to-primary/10 p-6 shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] font-bold text-primary border-primary/30">
-                TODAY • {formattedToday}
+              <Badge variant="outline" className="text-[10px] font-extrabold text-primary border-primary/40 bg-primary/5">
+                ⚡ TODAY • {formattedToday}
               </Badge>
             </div>
-            <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
-              Ready to Train Today?
+            <CardTitle className="text-xl sm:text-2xl font-black text-foreground">
+              Ready to Train?
             </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground max-w-md">
-              You can start a freestyle workout immediately or customize your weekly split to plan exercises.
-            </CardDescription>
+            <p className="text-xs text-muted-foreground">
+              Start logging instantly or activate your weekly training split.
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Link href="/execute">
-              <Button size="sm" className="gap-1.5 font-semibold text-xs h-9 shadow-sm">
-                <Play className="h-3.5 w-3.5 fill-current" />
-                Start Today&apos;s Workout
+              <Button size="default" className="gap-2 font-bold shadow-lg shadow-primary/20 h-10 px-5">
+                <Play className="h-4 w-4 fill-current" />
+                Start Workout
               </Button>
             </Link>
             <Link href="/workout">
-              <Button variant="outline" size="sm" className="gap-1.5 font-semibold text-xs h-9">
-                <PlusCircle className="h-3.5 w-3.5" />
-                Customize Routine Split
+              <Button variant="outline" size="default" className="gap-2 font-semibold text-xs h-10">
+                <PlusCircle className="h-4 w-4" />
+                Choose Routine
               </Button>
             </Link>
           </div>
@@ -59,58 +59,60 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
 
   if (todayDay?.isRestDay) {
     return (
-      <Card className="border-border bg-gradient-to-br from-card to-blue-500/5 shadow-sm">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-[10px]">
-                Rest & Recovery
-              </Badge>
+      <Card className="relative overflow-hidden border-blue-500/30 bg-gradient-to-br from-card via-card to-blue-500/10 p-5 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+              <Moon className="h-6 w-6" />
             </div>
-            <Moon className="h-5 w-5 text-blue-400" />
+            <div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  RECOVERY DAY
+                </Badge>
+                <span className="text-xs text-muted-foreground">{formattedToday}</span>
+              </div>
+              <h2 className="text-lg font-black text-foreground mt-0.5">Rest & Recharge</h2>
+            </div>
           </div>
-          <CardTitle className="text-xl font-bold text-foreground pt-1">
-            Scheduled Recovery Day
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Allow muscle fibers to repair, central nervous system to recharge, and hydrate adequately.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter className="pt-0 flex justify-between items-center text-xs text-muted-foreground border-t border-border/40 pt-3">
-          <span>Target: Rest, hydration & protein intake</span>
+
           <Link href="/calendar">
-            <Button variant="ghost" size="sm" className="text-xs h-8 gap-1">
-              View Week Schedule
-              <ChevronRight className="h-3 w-3" />
+            <Button variant="ghost" size="sm" className="text-xs font-semibold gap-1 h-8">
+              Schedule
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
-        </CardFooter>
+        </div>
       </Card>
     );
   }
 
   return (
-    <Card className="border-primary/40 bg-gradient-to-br from-card via-card to-primary/5 shadow-md">
-      <CardHeader className="pb-3 border-b border-border/50">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <Card className="relative overflow-hidden border-primary/40 bg-gradient-to-br from-card via-card to-primary/10 shadow-md">
+      <div className="p-5 sm:p-6 space-y-4">
+        {/* Header Strip */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Badge variant="default" className="text-[10px] font-bold">
-                TODAY&apos;S WORKOUT
+              <Badge variant="default" className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
+                TODAY&apos;S FOCUS
               </Badge>
+              <span className="text-xs font-medium text-muted-foreground">{formattedToday}</span>
             </div>
-            <CardTitle className="text-xl sm:text-2xl font-black text-foreground">
+            <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
               {todayDay?.label || 'Scheduled Workout'}
-            </CardTitle>
-            <CardDescription className="text-xs">
-              {todayDay?.exerciseCount || 0} planned exercises • Estimated ~45 mins
-            </CardDescription>
+            </h2>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground pt-0.5">
+              <span className="font-semibold text-primary">{todayDay?.exerciseCount || 0} exercises</span>
+              <span>•</span>
+              <span>~45 mins</span>
+            </div>
           </div>
 
           <Link href="/execute">
             <Button
               size="default"
-              className="gap-2 font-bold shadow-md h-10 px-5 w-full sm:w-auto"
+              className="gap-2 font-black shadow-lg shadow-primary/25 h-11 px-6 w-full sm:w-auto text-sm"
               aria-label="Start today's workout"
             >
               <Play className="h-4 w-4 fill-current" />
@@ -118,51 +120,50 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
             </Button>
           </Link>
         </div>
-      </CardHeader>
 
-      <CardContent className="pt-4 space-y-3">
-        {todayDay && todayDay.exercises.length > 0 ? (
-          <div className="grid gap-2 sm:grid-cols-2">
+        {/* Visual Exercise Mini-Grid */}
+        {todayDay && todayDay.exercises.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2 pt-1">
             {todayDay.exercises.slice(0, 4).map((ex: CalendarExerciseItem, i: number) => (
               <div
                 key={ex.id}
-                className="p-2.5 rounded-lg border border-border/80 bg-card/80 text-xs flex items-center justify-between"
+                className="group flex items-center justify-between p-2.5 rounded-xl border border-border/70 bg-card/80 hover:border-primary/40 transition-colors"
               >
-                <div>
-                  <span className="font-semibold text-foreground block">
-                    {i + 1}. {ex.name}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {ex.defaultSets} sets × {ex.defaultReps} reps
-                    {ex.defaultWeightKg ? ` @ ${ex.defaultWeightKg} kg` : ''}
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="h-6 w-6 rounded-lg bg-primary/10 text-primary text-xs font-extrabold flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </div>
+                  <div className="truncate">
+                    <span className="font-bold text-xs text-foreground block truncate">
+                      {ex.name}
+                    </span>
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      {ex.defaultSets} sets × {ex.defaultReps} reps
+                    </span>
+                  </div>
                 </div>
+
                 {ex.primaryMuscle && (
-                  <Badge variant="outline" className="text-[9px] py-0">
+                  <Badge variant="outline" className="text-[9px] font-semibold uppercase tracking-wider py-0.5 px-2 shrink-0 border-primary/30 text-primary bg-primary/5">
                     {ex.primaryMuscle}
                   </Badge>
                 )}
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-xs text-muted-foreground italic">No specific exercises configured for this day.</p>
         )}
-      </CardContent>
+      </div>
 
-      <CardFooter className="flex items-center justify-between border-t border-border/50 pt-3 pb-3 text-xs text-muted-foreground">
-        <Link href="/workout">
-          <Button variant="ghost" size="sm" className="text-xs h-8">
-            Edit Routine
-          </Button>
+      {/* Clean Visual Action Footer */}
+      <div className="flex items-center justify-between px-5 py-2.5 bg-muted/20 border-t border-border/40 text-xs">
+        <Link href="/workout" className="font-semibold text-muted-foreground hover:text-primary transition-colors">
+          Edit Split
         </Link>
-        <Link href="/calendar">
-          <Button variant="outline" size="sm" className="text-xs h-8 gap-1">
-            Browse Full Calendar
-            <ChevronRight className="h-3 w-3" />
-          </Button>
+        <Link href="/calendar" className="flex items-center gap-1 font-semibold text-primary hover:underline">
+          View Week
+          <ChevronRight className="h-3 w-3" />
         </Link>
-      </CardFooter>
+      </div>
     </Card>
   );
 }

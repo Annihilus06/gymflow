@@ -7,12 +7,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { onboardingSchema, type OnboardingInput } from '@/lib/validations/profile.schema';
 import { calculateBMI, getBMICategory } from '@/lib/utils/bmi';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { BMISpectrumGauge } from '@/components/ui/visual/BMISpectrumGauge';
 import {
   User,
   Scale,
@@ -22,6 +23,10 @@ import {
   CheckCircle2,
   Loader2,
   AlertCircle,
+  Flame,
+  Zap,
+  TrendingUp,
+  Dumbbell,
 } from 'lucide-react';
 
 export default function OnboardingPage() {
@@ -127,17 +132,33 @@ export default function OnboardingPage() {
   const progressPercentage = step === 1 ? 33 : step === 2 ? 66 : 100;
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      {/* Onboarding Header */}
+    <div className="mx-auto max-w-lg space-y-5 animate-in fade-in duration-200">
+      {/* Onboarding Visual Step Dials */}
       <div className="space-y-2 text-center">
-        <Badge variant="outline" className="text-primary border-primary/30">
-          Step {step} of 3
-        </Badge>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Set Up Your Profile</h1>
-        <p className="text-sm text-muted-foreground">
-          We use this to calculate your exact BMI, calorie targets, and recommended volume.
+        <div className="flex items-center justify-center gap-2">
+          {[1, 2, 3].map((s) => (
+            <div
+              key={s}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                step === s
+                  ? 'w-8 bg-primary shadow-sm'
+                  : step > s
+                  ? 'w-3 bg-primary/40'
+                  : 'w-3 bg-muted'
+              }`}
+            />
+          ))}
+        </div>
+        <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+          {step === 1 ? 'Personal Info' : step === 2 ? 'Body Metrics' : 'Your Goal'}
+        </h1>
+        <p className="text-xs text-muted-foreground">
+          {step === 1
+            ? 'Tell us your details for metabolic calculations'
+            : step === 2
+            ? 'We compute your live BMI and daily targets'
+            : 'Select your training focus and activity level'}
         </p>
-        <Progress value={progressPercentage} className="h-1.5 w-full mt-2" label="Onboarding Progress" />
       </div>
 
       <Card className="border-border/80 bg-card shadow-lg">
@@ -160,19 +181,16 @@ export default function OnboardingPage() {
           {/* STEP 1: Personal Details */}
           {step === 1 && (
             <>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 text-primary">
                   <User className="h-5 w-5" />
-                  <CardTitle className="text-xl">Personal Information</CardTitle>
+                  <CardTitle className="text-lg font-bold">Profile Basics</CardTitle>
                 </div>
-                <CardDescription>
-                  Tell us a bit about yourself for accurate metabolic calculations.
-                </CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Display Name</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name" className="text-xs font-semibold">Display Name</Label>
                   <Input
                     id="name"
                     placeholder="Alex"
@@ -184,8 +202,8 @@ export default function OnboardingPage() {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="dateOfBirth" className="text-xs font-semibold">Date of Birth</Label>
                   <Input
                     id="dateOfBirth"
                     type="date"
@@ -197,8 +215,8 @@ export default function OnboardingPage() {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Biological Sex (for metabolic equation)</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Biological Sex</Label>
                   <div className="grid grid-cols-3 gap-2">
                     {(['MALE', 'FEMALE', 'OTHER'] as const).map((s) => (
                       <button
@@ -208,10 +226,10 @@ export default function OnboardingPage() {
                           const event = { target: { value: s, name: 'sex' } };
                           register('sex').onChange(event);
                         }}
-                        className={`flex h-11 items-center justify-center rounded-lg border text-sm font-medium transition-colors ${
+                        className={`flex h-11 items-center justify-center rounded-xl border text-xs font-bold transition-colors ${
                           selectedSex === s
-                            ? 'border-primary bg-primary/10 text-primary font-semibold'
-                            : 'border-input hover:bg-accent'
+                            ? 'border-primary bg-primary/10 text-primary ring-1 ring-primary'
+                            : 'border-input hover:bg-muted/40'
                         }`}
                       >
                         {s === 'MALE' ? 'Male' : s === 'FEMALE' ? 'Female' : 'Other'}
@@ -229,20 +247,17 @@ export default function OnboardingPage() {
           {/* STEP 2: Body Metrics */}
           {step === 2 && (
             <>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 text-primary">
                   <Scale className="h-5 w-5" />
-                  <CardTitle className="text-xl">Body Measurements</CardTitle>
+                  <CardTitle className="text-lg font-bold">Body Metrics</CardTitle>
                 </div>
-                <CardDescription>
-                  Enter your current height and weight. All weights are stored securely in kg.
-                </CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="heightCm">Height (cm)</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="heightCm" className="text-xs font-semibold">Height (cm)</Label>
                     <Input
                       id="heightCm"
                       type="number"
@@ -255,8 +270,8 @@ export default function OnboardingPage() {
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="currentWeightKg">Current Weight (kg)</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="currentWeightKg" className="text-xs font-semibold">Weight (kg)</Label>
                     <Input
                       id="currentWeightKg"
                       type="number"
@@ -271,8 +286,8 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="targetWeightKg">Target Weight (kg) — Optional</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="targetWeightKg" className="text-xs font-semibold">Target Weight (kg) — Optional</Label>
                   <Input
                     id="targetWeightKg"
                     type="number"
@@ -282,21 +297,8 @@ export default function OnboardingPage() {
                   />
                 </div>
 
-                {/* Real-time calculated BMI Card */}
-                {previewBmi !== null && (
-                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Calculated BMI
-                      </span>
-                      <Badge variant="success">{bmiCategory}</Badge>
-                    </div>
-                    <div className="text-3xl font-extrabold text-primary">{previewBmi}</div>
-                    <p className="text-xs text-muted-foreground">
-                      Calculated deterministically using height and weight.
-                    </p>
-                  </div>
-                )}
+                {/* Live Visual BMI Spectrum Gauge */}
+                <BMISpectrumGauge bmi={previewBmi} category={bmiCategory} />
               </CardContent>
             </>
           )}
@@ -304,62 +306,68 @@ export default function OnboardingPage() {
           {/* STEP 3: Goals & Activity */}
           {step === 3 && (
             <>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center gap-2 text-primary">
                   <Target className="h-5 w-5" />
-                  <CardTitle className="text-xl">Fitness Goal & Activity</CardTitle>
+                  <CardTitle className="text-lg font-bold">Training Goal & Habits</CardTitle>
                 </div>
-                <CardDescription>
-                  Help GymFlow customize your workout volume and daily nutrition targets.
-                </CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Primary Fitness Goal</Label>
-                  <div className="grid gap-2 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Primary Goal</Label>
+                  <div className="grid gap-2 grid-cols-2">
                     {[
-                      { id: 'WEIGHT_LOSS', label: 'Weight Loss', desc: 'Caloric deficit & fat loss' },
-                      { id: 'MUSCLE_GAIN', label: 'Muscle Gain', desc: 'Hypertrophy & strength' },
-                      { id: 'STRENGTH_TARGET', label: 'Strength Focus', desc: 'Peak power & lifts' },
-                      { id: 'WORKOUT_FREQUENCY', label: 'Consistency', desc: 'Routine & habit building' },
-                    ].map((g) => (
-                      <button
-                        type="button"
-                        key={g.id}
-                        onClick={() => {
-                          const event = { target: { value: g.id, name: 'fitnessGoal' } };
-                          register('fitnessGoal').onChange(event);
-                        }}
-                        className={`flex flex-col items-start p-3 rounded-lg border text-left transition-all ${
-                          selectedGoal === g.id
-                            ? 'border-primary bg-primary/10 text-foreground ring-1 ring-primary'
-                            : 'border-input hover:bg-accent'
-                        }`}
-                      >
-                        <span className="font-semibold text-sm">{g.label}</span>
-                        <span className="text-xs text-muted-foreground">{g.desc}</span>
-                      </button>
-                    ))}
+                      { id: 'WEIGHT_LOSS', label: 'Weight Loss', icon: Flame, desc: 'Caloric deficit' },
+                      { id: 'MUSCLE_GAIN', label: 'Muscle Gain', icon: Dumbbell, desc: 'Hypertrophy' },
+                      { id: 'STRENGTH_TARGET', label: 'Strength Focus', icon: Zap, desc: 'Heavy lifts' },
+                      { id: 'WORKOUT_FREQUENCY', label: 'Consistency', icon: TrendingUp, desc: 'Habit building' },
+                    ].map((g) => {
+                      const Icon = g.icon;
+                      const isSelected = selectedGoal === g.id;
+                      return (
+                        <button
+                          type="button"
+                          key={g.id}
+                          onClick={() => {
+                            const event = { target: { value: g.id, name: 'fitnessGoal' } };
+                            register('fitnessGoal').onChange(event);
+                          }}
+                          className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? 'border-primary bg-primary/10 text-foreground ring-1 ring-primary'
+                              : 'border-border/70 hover:bg-muted/40'
+                          }`}
+                        >
+                          <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-xs block">{g.label}</span>
+                            <span className="text-[10px] text-muted-foreground">{g.desc}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Activity Level</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Activity Level</Label>
                   <select
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-xs font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                     {...register('activityLevel')}
                   >
-                    <option value="SEDENTARY">Sedentary (Desk job, little exercise)</option>
-                    <option value="LIGHTLY_ACTIVE">Lightly Active (Exercise 1-3 days/week)</option>
-                    <option value="MODERATELY_ACTIVE">Moderately Active (Exercise 3-5 days/week)</option>
-                    <option value="VERY_ACTIVE">Very Active (Exercise 6-7 days/week)</option>
-                    <option value="EXTRA_ACTIVE">Extra Active (Hard exercise & physical job)</option>
+                    <option value="SEDENTARY">Sedentary (Desk job, minimal exercise)</option>
+                    <option value="LIGHTLY_ACTIVE">Lightly Active (1-3 days / week)</option>
+                    <option value="MODERATELY_ACTIVE">Moderately Active (3-5 days / week)</option>
+                    <option value="VERY_ACTIVE">Very Active (6-7 days / week)</option>
+                    <option value="EXTRA_ACTIVE">Extra Active (Hard training / physical work)</option>
                   </select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Experience Level</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Experience Level</Label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'BEGINNER', label: 'Beginner' },
@@ -373,10 +381,10 @@ export default function OnboardingPage() {
                           const event = { target: { value: exp.id, name: 'experienceLevel' } };
                           register('experienceLevel').onChange(event);
                         }}
-                        className={`flex h-10 items-center justify-center rounded-lg border text-xs font-medium transition-colors ${
+                        className={`flex h-10 items-center justify-center rounded-xl border text-xs font-bold transition-colors ${
                           watch('experienceLevel') === exp.id
-                            ? 'border-primary bg-primary/10 text-primary font-semibold'
-                            : 'border-input hover:bg-accent'
+                            ? 'border-primary bg-primary/10 text-primary ring-1 ring-primary'
+                            : 'border-input hover:bg-muted/40'
                         }`}
                       >
                         {exp.label}
@@ -388,7 +396,7 @@ export default function OnboardingPage() {
                 {errorMessage && (
                   <div
                     role="alert"
-                    className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+                    className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
                   >
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>{errorMessage}</span>
@@ -400,8 +408,8 @@ export default function OnboardingPage() {
 
           <CardFooter className="flex justify-between border-t border-border pt-4">
             {step > 1 ? (
-              <Button type="button" variant="outline" onClick={prevStep} disabled={isLoading}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
+              <Button type="button" variant="outline" size="sm" onClick={prevStep} disabled={isLoading} className="text-xs font-semibold">
+                <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
                 Back
               </Button>
             ) : (
@@ -409,20 +417,20 @@ export default function OnboardingPage() {
             )}
 
             {step < 3 ? (
-              <Button type="button" onClick={nextStep}>
+              <Button type="button" size="sm" onClick={nextStep} className="text-xs font-bold gap-1">
                 Next
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isLoading} className="font-semibold gap-2">
+              <Button type="submit" size="sm" disabled={isLoading} className="text-xs font-black gap-2 shadow-md shadow-primary/20">
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-3.5 w-3.5" />
                     Complete Setup
                   </>
                 )}

@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Activity, Flame, ChevronRight } from 'lucide-react';
+import { ProgressRing } from '@/components/ui/visual/ProgressRing';
 import type { ProgressSummary } from '@/lib/services/progress.service';
 
 interface WeeklyFrequencyCardProps {
@@ -19,47 +19,52 @@ export function WeeklyFrequencyCard({ stats }: WeeklyFrequencyCardProps) {
   const streak = stats?.streak ?? 0;
 
   return (
-    <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20 shadow-sm">
-      <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-1.5">
-            <Activity className="h-4 w-4 text-primary" />
-            <CardTitle className="text-sm font-bold text-foreground">
-              Weekly Frequency
-            </CardTitle>
+    <Card className="relative overflow-hidden bg-card border-border/80 p-5 shadow-sm">
+      <div className="flex items-center justify-between pb-3 border-b border-border/40">
+        <div className="flex items-center gap-2">
+          <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <Activity className="h-4 w-4" />
           </div>
-          <CardDescription className="text-xs">
-            {completed} of {planned} planned workouts completed
-          </CardDescription>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Weekly Activity
+          </span>
         </div>
 
         <Link href="/progress">
-          <Badge variant="outline" className="text-[10px] gap-1 cursor-pointer hover:bg-muted">
-            Stats
-            <ChevronRight className="h-2.5 w-2.5" />
+          <Badge variant="outline" className="text-[11px] font-semibold gap-1 text-primary hover:bg-primary/10">
+            Analytics
+            <ChevronRight className="h-3 w-3" />
           </Badge>
         </Link>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-3 pt-1">
-        <div className="flex items-baseline justify-between">
-          <span className="text-3xl font-black text-primary">{frequencyPct}%</span>
-          <div className="flex items-center gap-1 text-xs font-semibold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-md border border-orange-500/20">
+      <CardContent className="p-0 pt-4 flex items-center justify-between">
+        {/* Progress Ring */}
+        <ProgressRing
+          percentage={frequencyPct}
+          size={78}
+          strokeWidth={7}
+          color="stroke-primary"
+          centerContent={
+            <span className="text-base font-black tracking-tight text-foreground">
+              {frequencyPct}%
+            </span>
+          }
+        />
+
+        {/* Metric Details */}
+        <div className="space-y-2 text-right">
+          <div className="flex items-center justify-end gap-1.5 text-xs font-bold text-orange-400 bg-orange-400/10 px-2.5 py-1 rounded-full border border-orange-400/20 w-fit ml-auto">
             <Flame className="h-3.5 w-3.5 fill-current" />
-            <span>{streak} {streak === 1 ? 'day' : 'days'} streak</span>
+            <span>{streak}d streak</span>
           </div>
-        </div>
 
-        <div className="space-y-1">
-          <Progress
-            value={frequencyPct}
-            className="h-2"
-            role="progressbar"
-            aria-valuenow={frequencyPct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Weekly workout completion frequency"
-          />
+          <div>
+            <div className="text-xl font-black text-foreground">
+              {completed} <span className="text-sm font-medium text-muted-foreground">/ {planned}</span>
+            </div>
+            <p className="text-[11px] font-medium text-muted-foreground">Workouts Completed</p>
+          </div>
         </div>
       </CardContent>
     </Card>

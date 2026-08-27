@@ -15,8 +15,8 @@ describe('Dashboard Modular UI Components', () => {
   describe('TodayWorkoutCard', () => {
     it('renders empty routine state with CTA when user has no active routine', () => {
       render(<TodayWorkoutCard hasActiveRoutine={false} />);
-      expect(screen.getByText(/Ready to Train Today\?/i)).toBeInTheDocument();
-      expect(screen.getByText(/Start Today's Workout/i)).toBeInTheDocument();
+      expect(screen.getByText(/Ready to Train/i)).toBeInTheDocument();
+      expect(screen.getByText(/Start Workout/i)).toBeInTheDocument();
     });
 
     it('renders recovery card when today is a rest day', () => {
@@ -34,8 +34,8 @@ describe('Dashboard Modular UI Components', () => {
       };
 
       render(<TodayWorkoutCard todayDay={restDay} hasActiveRoutine={true} />);
-      expect(screen.getByText(/Scheduled Recovery Day/i)).toBeInTheDocument();
-      expect(screen.getByText(/Rest & Recovery/i)).toBeInTheDocument();
+      expect(screen.getByText(/RECOVERY DAY/i)).toBeInTheDocument();
+      expect(screen.getByText(/Rest & Recharge/i)).toBeInTheDocument();
     });
 
     it('renders workout focus card with Start Workout CTA when exercises are scheduled', () => {
@@ -90,8 +90,8 @@ describe('Dashboard Modular UI Components', () => {
 
       render(<WeeklyFrequencyCard stats={mockStats} />);
       expect(screen.getByText('80%')).toBeInTheDocument();
-      expect(screen.getByText(/4 of 5 planned workouts completed/i)).toBeInTheDocument();
-      expect(screen.getByText(/3 days streak/i)).toBeInTheDocument();
+      expect(screen.getByText(/Workouts Completed/i)).toBeInTheDocument();
+      expect(screen.getByText(/3d streak/i)).toBeInTheDocument();
     });
   });
 
@@ -159,11 +159,11 @@ describe('Dashboard Modular UI Components', () => {
       };
 
       render(<BiometricsOverview profileData={mockProfileData} />);
-      expect(screen.getByText('80 kg')).toBeInTheDocument();
+      expect(screen.getByText('80')).toBeInTheDocument();
       expect(screen.getByText('24.69')).toBeInTheDocument();
       expect(screen.getByText('Normal weight')).toBeInTheDocument();
-      expect(screen.getByText('2259 kcal')).toBeInTheDocument();
-      expect(screen.getByText('176 g')).toBeInTheDocument();
+      expect(screen.getByText('2259')).toBeInTheDocument();
+      expect(screen.getByText('176')).toBeInTheDocument();
     });
   });
 

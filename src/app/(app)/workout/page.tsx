@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Moon,
   ChevronRight,
+  Zap,
 } from 'lucide-react';
 
 interface RoutineDaySummary {
@@ -71,7 +72,7 @@ export default function WorkoutPage() {
     try {
       const res = await fetch(`/api/routines/${routineId}/activate`, { method: 'POST' });
       if (res.ok) {
-        setSuccessMessage('Active weekly routine updated!');
+        setSuccessMessage('Active routine updated!');
         await fetchRoutines();
       } else {
         const err = await res.json();
@@ -91,7 +92,7 @@ export default function WorkoutPage() {
       const res = await fetch(`/api/routines/${routineId}/duplicate`, { method: 'POST' });
       if (res.ok) {
         const cloned = await res.json();
-        setSuccessMessage(`Cloned routine as "${cloned.name}"`);
+        setSuccessMessage(`Cloned "${cloned.name}"`);
         await fetchRoutines();
       } else {
         const err = await res.json();
@@ -105,7 +106,7 @@ export default function WorkoutPage() {
   };
 
   const handleDelete = async (routineId: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!confirm(`Delete routine "${name}"?`)) return;
 
     setActionLoadingId(routineId);
     setErrorMessage(null);
@@ -136,19 +137,22 @@ export default function WorkoutPage() {
   const activeRoutine = routines.find((r) => r.isActive);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto pb-12 animate-in fade-in duration-200">
       {/* Top Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Workout & Routines</h1>
-          <p className="text-sm text-muted-foreground">
-            Design your weekly split, configure muscle groups, and manage planned training days.
+          <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl flex items-center gap-2">
+            <Dumbbell className="h-7 w-7 text-primary" />
+            Training Routines
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Custom weekly splits, volume allocation, and exercise plans.
           </p>
         </div>
         <Link href="/routines/new">
-          <Button className="font-semibold gap-2 shadow-sm w-full sm:w-auto">
+          <Button className="font-bold gap-2 shadow-sm w-full sm:w-auto h-10 px-5">
             <Plus className="h-4 w-4" />
-            Create New Routine
+            New Routine
           </Button>
         </Link>
       </div>
@@ -156,14 +160,14 @@ export default function WorkoutPage() {
       {successMessage && (
         <div
           role="status"
-          className="flex items-center justify-between rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-400"
+          className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-400"
         >
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 shrink-0" />
             <span>{successMessage}</span>
           </div>
-          <button onClick={() => setSuccessMessage(null)} className="text-xs hover:underline">
-            Dismiss
+          <button onClick={() => setSuccessMessage(null)} className="hover:underline">
+            ✕
           </button>
         </div>
       )}
@@ -171,104 +175,93 @@ export default function WorkoutPage() {
       {errorMessage && (
         <div
           role="alert"
-          className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+          className="flex items-center justify-between rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs font-semibold text-destructive"
         >
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
-          <button onClick={() => setErrorMessage(null)} className="text-xs hover:underline">
-            Dismiss
+          <button onClick={() => setErrorMessage(null)} className="hover:underline">
+            ✕
           </button>
         </div>
       )}
 
-      {/* Active Weekly Routine Overview */}
+      {/* Active Weekly Routine Visual Split */}
       {activeRoutine ? (
-        <Card className="border-primary/40 bg-gradient-to-br from-card via-card to-primary/5 shadow-md">
-          <CardHeader className="pb-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+        <Card className="relative overflow-hidden border-primary/40 bg-gradient-to-br from-card via-card to-primary/10 shadow-md">
+          <div className="p-5 sm:p-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-3">
               <div className="flex items-center gap-2">
-                <Badge variant="default" className="bg-primary text-primary-foreground font-semibold">
-                  Active Weekly Split
+                <Badge variant="default" className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
+                  ACTIVE SPLIT
                 </Badge>
-                <CardTitle className="text-xl font-bold">{activeRoutine.name}</CardTitle>
+                <h2 className="text-xl sm:text-2xl font-black text-foreground">{activeRoutine.name}</h2>
               </div>
               <Link href={`/routines/${activeRoutine.id}`}>
-                <Button variant="outline" size="sm" className="gap-1.5 font-medium">
-                  <Edit className="h-3.5 w-3.5" />
-                  Edit Split
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs font-bold h-8">
+                  <Edit className="h-3 w-3" />
+                  Edit Plan
                 </Button>
               </Link>
             </div>
-            {activeRoutine.description && (
-              <CardDescription className="text-sm pt-1">{activeRoutine.description}</CardDescription>
-            )}
-          </CardHeader>
 
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground border-y border-border/50 py-2">
-              <div>
-                <span className="font-semibold text-foreground">{activeRoutine.workoutDaysCount}</span> Workout Days
-              </div>
-              <div>•</div>
-              <div>
-                <span className="font-semibold text-foreground">{activeRoutine.restDaysCount}</span> Rest Days
-              </div>
-              <div>•</div>
-              <div>
-                <span className="font-semibold text-foreground">{activeRoutine.totalExercises}</span> Planned Exercises
-              </div>
+            <div className="flex items-center gap-3 text-xs font-semibold text-muted-foreground">
+              <span className="text-primary font-bold">{activeRoutine.workoutDaysCount} Training Days</span>
+              <span>•</span>
+              <span>{activeRoutine.restDaysCount} Rest Days</span>
+              <span>•</span>
+              <span>{activeRoutine.totalExercises} Exercises</span>
             </div>
 
-            {/* 7-Day Visual Grid */}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+            {/* 7-Day Visual Split Grid */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7 pt-1">
               {activeRoutine.days.map((day) => {
                 const dayShort = day.dayOfWeek.slice(0, 3);
                 return (
                   <Link
                     key={day.id}
                     href={`/routines/${activeRoutine.id}?day=${day.dayOfWeek}`}
-                    className={`flex flex-col justify-between p-3 rounded-lg border text-left transition-all hover:border-primary/50 hover:shadow-sm ${
+                    className={`group flex flex-col justify-between p-3 rounded-xl border text-left transition-all hover:border-primary/50 ${
                       day.isRestDay
-                        ? 'border-border/40 bg-muted/30 text-muted-foreground'
-                        : 'border-border/80 bg-card/60 text-card-foreground ring-1 ring-border/20'
+                        ? 'border-border/40 bg-muted/20 text-muted-foreground'
+                        : 'border-border/80 bg-card/80 text-foreground ring-1 ring-border/20 hover:shadow-sm'
                     }`}
                   >
                     <div>
-                      <div className="flex items-center justify-between pb-1">
-                        <span className="text-xs font-bold uppercase tracking-wider">{dayShort}</span>
+                      <div className="flex items-center justify-between pb-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{dayShort}</span>
                         {day.isRestDay ? (
-                          <Moon className="h-3.5 w-3.5 text-muted-foreground/70" />
+                          <Moon className="h-3.5 w-3.5 text-blue-400" />
                         ) : (
                           <Dumbbell className="h-3.5 w-3.5 text-primary" />
                         )}
                       </div>
-                      <p className="text-xs font-semibold line-clamp-1">
-                        {day.isRestDay ? 'Rest Day' : day.label || 'Workout'}
+                      <p className="text-xs font-bold truncate">
+                        {day.isRestDay ? 'Recovery' : day.label || 'Workout'}
                       </p>
                     </div>
 
-                    <div className="pt-2 text-[11px] text-muted-foreground">
-                      {day.isRestDay ? 'Recovery' : `${day.exerciseCount} exercises`}
+                    <div className="pt-2 text-[10px] font-semibold text-muted-foreground">
+                      {day.isRestDay ? 'Rest Day' : `${day.exerciseCount} exercises`}
                     </div>
                   </Link>
                 );
               })}
             </div>
-          </CardContent>
+          </div>
         </Card>
       ) : (
-        <Card className="border-dashed border-border/80 p-8 text-center bg-card/40">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-3">
+        <Card className="border-dashed border-border/80 p-8 text-center bg-card/40 rounded-2xl">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
             <Calendar className="h-6 w-6" />
           </div>
-          <CardTitle className="text-lg">No Active Routine</CardTitle>
-          <CardDescription className="max-w-md mx-auto mt-1 mb-4">
-            Build your planned workout schedule to customize your training days and exercise order.
-          </CardDescription>
+          <CardTitle className="text-lg font-bold">No Active Routine</CardTitle>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1 mb-4">
+            Build your weekly workout schedule to assign daily muscle groups and exercises.
+          </p>
           <Link href="/routines/new">
-            <Button className="font-semibold gap-2">
+            <Button className="font-bold text-xs gap-2">
               <Plus className="h-4 w-4" />
               Build Your First Routine
             </Button>
@@ -278,47 +271,45 @@ export default function WorkoutPage() {
 
       {/* Routine Collection List */}
       <div className="space-y-3 pt-2">
-        <h2 className="text-lg font-bold tracking-tight">All Saved Routines</h2>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          All Saved Routines ({routines.length})
+        </h3>
 
         {routines.length === 0 ? (
-          <div className="text-sm text-muted-foreground py-4 text-center">
-            No routines found. Click &quot;Create New Routine&quot; to get started.
+          <div className="text-xs text-muted-foreground py-4 text-center">
+            No routines saved yet.
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {routines.map((routine) => (
-              <Card key={routine.id} className="border-border/70 bg-card hover:border-border transition-colors">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-base font-semibold">{routine.name}</CardTitle>
-                        {routine.isActive && (
-                          <Badge variant="success" className="text-[10px]">
-                            Active
-                          </Badge>
-                        )}
-                      </div>
-                      {routine.description && (
-                        <CardDescription className="text-xs line-clamp-1 mt-0.5">
-                          {routine.description}
-                        </CardDescription>
+              <Card key={routine.id} className="border-border/80 bg-card hover:border-border transition-colors p-4 space-y-3 shadow-sm rounded-xl">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-foreground">{routine.name}</span>
+                      {routine.isActive && (
+                        <Badge variant="default" className="text-[9px] font-black uppercase px-1.5 py-0">
+                          Active
+                        </Badge>
                       )}
                     </div>
+                    {routine.description && (
+                      <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                        {routine.description}
+                      </p>
+                    )}
                   </div>
-                </CardHeader>
+                </div>
 
-                <CardContent className="pb-3 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <span>{routine.workoutDaysCount} Training Days</span>
-                    <span>•</span>
-                    <span>{routine.restDaysCount} Rest Days</span>
-                    <span>•</span>
-                    <span>{routine.totalExercises} Exercises</span>
-                  </div>
-                </CardContent>
+                <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground border-y border-border/40 py-2">
+                  <span>{routine.workoutDaysCount} Training Days</span>
+                  <span>•</span>
+                  <span>{routine.restDaysCount} Rest</span>
+                  <span>•</span>
+                  <span>{routine.totalExercises} Exercises</span>
+                </div>
 
-                <CardFooter className="flex items-center justify-between border-t border-border/50 pt-2 pb-2">
+                <div className="flex items-center justify-between pt-1">
                   <div className="flex items-center gap-1">
                     {!routine.isActive && (
                       <Button
@@ -326,7 +317,7 @@ export default function WorkoutPage() {
                         size="sm"
                         disabled={actionLoadingId === routine.id}
                         onClick={() => handleActivate(routine.id)}
-                        className="text-xs h-8 text-primary hover:text-primary"
+                        className="text-xs h-7 font-bold text-primary hover:text-primary"
                       >
                         Set Active
                       </Button>
@@ -336,17 +327,17 @@ export default function WorkoutPage() {
                       size="sm"
                       disabled={actionLoadingId === routine.id}
                       onClick={() => handleDuplicate(routine.id)}
-                      className="text-xs h-8 text-muted-foreground"
+                      className="text-xs h-7 text-muted-foreground"
                     >
                       <Copy className="h-3 w-3 mr-1" />
-                      Duplicate
+                      Clone
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       disabled={actionLoadingId === routine.id}
                       onClick={() => handleDelete(routine.id, routine.name)}
-                      className="text-xs h-8 text-destructive hover:text-destructive"
+                      className="text-xs h-7 text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
                       Delete
@@ -354,12 +345,12 @@ export default function WorkoutPage() {
                   </div>
 
                   <Link href={`/routines/${routine.id}`}>
-                    <Button variant="outline" size="sm" className="text-xs h-8 gap-1">
+                    <Button variant="outline" size="sm" className="text-xs h-7 font-bold gap-1">
                       Edit
                       <ChevronRight className="h-3 w-3" />
                     </Button>
                   </Link>
-                </CardFooter>
+                </div>
               </Card>
             ))}
           </div>

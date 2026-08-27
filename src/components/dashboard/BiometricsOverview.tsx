@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Scale, Flame, Activity, ChevronRight } from 'lucide-react';
+import { Scale, Flame, Activity, ChevronRight, Zap } from 'lucide-react';
 import type { UserProfileResponse } from '@/lib/services/profile.service';
 
 interface BiometricsOverviewProps {
@@ -19,81 +19,105 @@ export function BiometricsOverview({ profileData }: BiometricsOverviewProps) {
     return null;
   }
 
+  const getBmiBadgeStyle = (category?: string | null) => {
+    switch (category) {
+      case 'Underweight':
+        return 'text-sky-400 bg-sky-400/10 border-sky-400/30';
+      case 'Normal weight':
+        return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30';
+      case 'Overweight':
+        return 'text-amber-400 bg-amber-400/10 border-amber-400/30';
+      case 'Obesity':
+        return 'text-rose-400 bg-rose-400/10 border-rose-400/30';
+      default:
+        return 'text-primary bg-primary/10 border-primary/30';
+    }
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold tracking-tight text-foreground">
-          Biometric & Nutrition Metrics
-        </h2>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          Biometrics & Fuel
+        </h3>
         <Link href="/nutrition">
-          <Badge variant="outline" className="text-[10px] gap-1 cursor-pointer hover:bg-muted">
-            Details
-            <ChevronRight className="h-2.5 w-2.5" />
+          <Badge variant="outline" className="text-[11px] font-semibold gap-1 text-primary hover:bg-primary/10">
+            Targets
+            <ChevronRight className="h-3 w-3" />
           </Badge>
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Weight Card */}
-        <Card className="bg-card border-border shadow-sm">
-          <CardHeader className="pb-1.5 flex flex-row items-center justify-between">
-            <CardDescription className="text-xs font-semibold">Body Weight</CardDescription>
-            <Scale className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {metrics.currentWeightKg ? `${metrics.currentWeightKg} kg` : '--'}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        {/* Weight */}
+        <Card className="bg-card border-border/80 p-4 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between pb-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase">Weight</span>
+            <div className="h-7 w-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+              <Scale className="h-3.5 w-3.5" />
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Height: {profile?.heightCm ? `${profile.heightCm} cm` : '--'}
-            </p>
-          </CardContent>
+          </div>
+          <div className="text-2xl font-black text-foreground">
+            {metrics.currentWeightKg ? `${metrics.currentWeightKg}` : '--'}
+            <span className="text-xs font-semibold text-muted-foreground ml-1">kg</span>
+          </div>
+          <div className="mt-2 text-[10px] font-medium text-muted-foreground">
+            Height: {profile?.heightCm ? `${profile.heightCm} cm` : '--'}
+          </div>
         </Card>
 
-        {/* BMI Card */}
-        <Card className="bg-card border-border shadow-sm">
-          <CardHeader className="pb-1.5 flex flex-row items-center justify-between">
-            <CardDescription className="text-xs font-semibold">BMI Index</CardDescription>
-            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-bold">
+        {/* BMI */}
+        <Card className="bg-card border-border/80 p-4 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between pb-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase">BMI</span>
+            <Badge
+              variant="outline"
+              className={`text-[9px] font-bold px-1.5 py-0 border ${getBmiBadgeStyle(metrics.bmiCategory)}`}
+            >
               {metrics.bmiCategory || 'N/A'}
             </Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black text-primary">
-              {metrics.bmi ?? '--'}
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">WHO Standard model</p>
-          </CardContent>
+          </div>
+          <div className="text-2xl font-black text-primary">
+            {metrics.bmi ?? '--'}
+          </div>
+          {/* Visual BMI Bar */}
+          <div className="mt-2.5 h-1.5 w-full rounded-full bg-gradient-to-r from-sky-400 via-emerald-400 via-amber-400 to-rose-500" />
         </Card>
 
-        {/* Daily Calorie Target */}
-        <Card className="bg-card border-border shadow-sm">
-          <CardHeader className="pb-1.5 flex flex-row items-center justify-between">
-            <CardDescription className="text-xs font-semibold">Calorie Target</CardDescription>
-            <Flame className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {metrics.dailyCalorieTarget ? `${metrics.dailyCalorieTarget} kcal` : '--'}
+        {/* Calories */}
+        <Card className="bg-card border-border/80 p-4 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between pb-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase">Calories</span>
+            <div className="h-7 w-7 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center">
+              <Flame className="h-3.5 w-3.5 fill-current" />
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              TDEE: {metrics.tdee ?? '--'} kcal
-            </p>
-          </CardContent>
+          </div>
+          <div className="text-2xl font-black text-foreground">
+            {metrics.dailyCalorieTarget ?? '--'}
+            <span className="text-xs font-semibold text-muted-foreground ml-1">kcal</span>
+          </div>
+          {/* Calorie visual meter */}
+          <div className="mt-2.5 h-1.5 w-full rounded-full bg-muted/50 overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 w-[85%]" />
+          </div>
         </Card>
 
-        {/* Daily Protein Target */}
-        <Card className="bg-card border-border shadow-sm">
-          <CardHeader className="pb-1.5 flex flex-row items-center justify-between">
-            <CardDescription className="text-xs font-semibold">Protein Target</CardDescription>
-            <Activity className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {metrics.dailyProteinTargetG ? `${metrics.dailyProteinTargetG} g` : '--'}
+        {/* Protein */}
+        <Card className="bg-card border-border/80 p-4 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between pb-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase">Protein</span>
+            <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <Activity className="h-3.5 w-3.5" />
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Sports nutrition ratio</p>
-          </CardContent>
+          </div>
+          <div className="text-2xl font-black text-foreground">
+            {metrics.dailyProteinTargetG ?? '--'}
+            <span className="text-xs font-semibold text-muted-foreground ml-1">g</span>
+          </div>
+          {/* Protein visual meter */}
+          <div className="mt-2.5 h-1.5 w-full rounded-full bg-muted/50 overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 w-[90%]" />
+          </div>
         </Card>
       </div>
     </div>
