@@ -38,7 +38,7 @@ export function AnatomicalBody({
     hoveredMuscle?.toLowerCase() === muscle.toLowerCase();
 
   const getMuscleFill = (muscle: string) => {
-    if (isMuscleActive(muscle)) return 'fill-primary stroke-primary filter drop-shadow(0 0 6px rgba(34,197,94,0.6))';
+    if (isMuscleActive(muscle)) return 'fill-primary stroke-primary drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]';
     if (isMuscleHovered(muscle)) return 'fill-primary/40 stroke-primary/80';
     return 'fill-muted/60 stroke-muted-foreground/40 hover:fill-primary/30';
   };

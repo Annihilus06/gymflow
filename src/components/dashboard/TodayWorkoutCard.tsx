@@ -26,7 +26,7 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] font-extrabold text-primary border-primary/40 bg-primary/5">
+              <Badge variant="outline" className="text-[10px] font-extrabold text-primary border-primary/40 bg-primary/5" suppressHydrationWarning>
                 ⚡ TODAY • {formattedToday}
               </Badge>
             </div>
@@ -70,7 +70,7 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
                 <Badge variant="secondary" className="text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
                   RECOVERY DAY
                 </Badge>
-                <span className="text-xs text-muted-foreground">{formattedToday}</span>
+                <span className="text-xs text-muted-foreground" suppressHydrationWarning>{formattedToday}</span>
               </div>
               <h2 className="text-lg font-black text-foreground mt-0.5">Rest & Recharge</h2>
             </div>
@@ -97,7 +97,7 @@ export function TodayWorkoutCard({ todayDay, hasActiveRoutine }: TodayWorkoutCar
               <Badge variant="default" className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 shadow-sm">
                 TODAY&apos;S FOCUS
               </Badge>
-              <span className="text-xs font-medium text-muted-foreground">{formattedToday}</span>
+              <span className="text-xs font-medium text-muted-foreground" suppressHydrationWarning>{formattedToday}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
               {todayDay?.label || 'Scheduled Workout'}

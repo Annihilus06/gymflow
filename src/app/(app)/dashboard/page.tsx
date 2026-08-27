@@ -102,7 +102,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
             Welcome, <span className="text-primary">{profileData?.name || 'Athlete'}</span>
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground" suppressHydrationWarning>
             {formattedToday} • {todayDay?.isRestDay ? 'Scheduled recovery day' : todayDay?.label ? `Today: ${todayDay.label}` : 'Consistent daily progress'}
           </p>
         </div>
